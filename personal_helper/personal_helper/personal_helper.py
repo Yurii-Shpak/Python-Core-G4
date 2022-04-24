@@ -24,6 +24,13 @@ class AddressBook(UserDict):
             raise CustomException(
                 'Such contacts name doesn\'t exist (Command format: <command> <name> <information>)')
 
+    def remove(self, name):
+        if self.data.get(name):
+            self.data.pop(name)
+        else:
+            raise CustomException(
+                'Such contacts name doesn\'t exist (Command format: <command> <name> <information>)')
+
     def load_from_file(self, file_name):
         if os.path.exists(file_name):
             with open(file_name, 'rb') as fh:
@@ -46,7 +53,7 @@ contacts = AddressBook()
 
 class Record:
 
-    def __init__(self, name, address=None, phones_list=None, email=None, birthday=None):
+    def __init__(self, name, address=None, phones_list=[], email=None, birthday=None):
         self.name = name
         self._address = address
         self._phones_list = phones_list
@@ -181,6 +188,14 @@ def add_phone(command_line):
     else:
         raise CustomException('Such phone number has been already added!!!')
 
+@input_error
+def remove(command_line):
+    key, _ = prepare_value(command_line)
+    if contacts.get_record(key):
+        contacts.remove(key)
+        return f'Contact {key} has been successfully removed'
+    else:
+        raise CustomException('Such contact does not exist!!!')
 
 @input_error
 def coming_birthday(command_line=7):  # in progress
@@ -198,10 +213,11 @@ COMMANDS = {
     'add birthday': add_birthday,
     'add email': add_email,
     'add phone': add_phone,
+    'remove': remove,
     'coming birthday': coming_birthday
 }
 
-ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save']
+ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday',
                       'add email', 'add phone', 'coming birthday', 'good bye']
 
