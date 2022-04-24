@@ -46,7 +46,7 @@ contacts = AddressBook()
 
 class Record:
 
-    def __init__(self, name, address=None, phones_list=[], email=None, birthday=None):
+    def __init__(self, name, address=None, phones_list=None, email=None, birthday=None):
         self.name = name
         self._address = address
         self._phones_list = phones_list
