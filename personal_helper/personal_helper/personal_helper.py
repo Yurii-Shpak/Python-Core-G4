@@ -131,7 +131,7 @@ def save_func(command_line):
 # если нет имени, будет ошибка Such contacts name doesn't exist
 def prepare_value(command_line):
     if command_line:
-        key = command_line.pop(0).lower()
+        key = command_line.pop(0)
         value = ' '.join(command_line)
         return key, value
     else:
