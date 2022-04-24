@@ -10,6 +10,12 @@ class CustomException(Exception):
 
 class AddressBook(UserDict):
 
+    def get_values_list(self):
+        if self.data:
+            return self.data.values()
+        else:
+            raise CustomException('Address book is empty')
+
     def get_record(self, name):
         if self.data.get(name):
             return self.data.get(name)
@@ -76,7 +82,7 @@ class Record:
         
     @property
     def birthday(self):
-        return self._email
+        return self._birthday
     
 
     @birthday.setter
@@ -163,8 +169,9 @@ def add_phone(command_line):
         raise CustomException('Such phone number has been already added!!!')
         
 @input_error
-def coming_birthday(command_line):# in progress
-    return contacts.values()
+def coming_birthday(command_line = 7):# in progress
+    list_bithday = [i for i in contacts.get_values_list()]
+    return contacts.get_values_list()
 
 
 COMMANDS = {
