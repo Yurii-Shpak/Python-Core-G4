@@ -100,6 +100,7 @@ def input_error(func):
         except:
             if func.__name__ == 'save_func':
                 result = f'Error while saving.'
+                
         return result
 
     return inner
@@ -116,7 +117,6 @@ def save_func(command_line):
 
     return contacts.save_to_file('contacts.bin')
 
-@input_error
 def prepare_value(command_line):#если нет имени, будет ошибка Such contacts name doesn't exist
     if command_line:
         key = command_line.pop(0).lower()
@@ -124,7 +124,7 @@ def prepare_value(command_line):#если нет имени, будет ошиб
         return key, value
     else:
         raise CustomException('With command must to be INFORMATION you want to add(Format: command Name information)')
-
+    
 @input_error
 def add_name(command_line):#если имя уже существует?
     if command_line:
@@ -200,7 +200,7 @@ def main():
             print(
                 f'The "{command}" command is wrong! The allowable commands are {", ".join(ONE_WORD_COMMANDS + TWO_WORDS_COMMANDS)}.')
             continue
-
+        
         handler = get_handler(command)
         print(handler(command_line))
         if handler is exit_func:
