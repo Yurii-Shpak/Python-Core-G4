@@ -131,7 +131,7 @@ def add_name(command_line):#если имя уже существует?
         name = ' '.join(command_line).lower()
         record = Record(name = name)
         contacts[record.name] = record
-        return f'Contacts name has been successfully added!!!'
+        return f'Contacts name has been successfully added'
     else:
         raise CustomException('With command must to be NAME you want to add (Format: <add> <name>)')
 
@@ -160,10 +160,10 @@ def add_phone(command_line):
         contacts.get_record(key).append_phone(phone)
         return f'Contacts phone number has been successfully added'
     else:
-        raise CustomException('Such phone number has been already added')
+        raise CustomException('Such phone number has been already added!!!')
         
 @input_error
-def birthday_list(command_line):
+def coming_birthday(command_line):# in progress
     return contacts.values()
 
 
@@ -177,11 +177,11 @@ COMMANDS = {
     'add birthday': add_birthday,
     'add email': add_email,
     'add phone': add_phone,
-    'birthday list': birthday_list
+    'coming birthday': coming_birthday
 }
 
 ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save']
-TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone', 'birthday list', 'good bye']
+TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone', 'coming birthday', 'good bye']
 
 
 def get_handler(command):
