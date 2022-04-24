@@ -46,10 +46,10 @@ class Record:
         self._birthday = birthday
 
     def append_phone(self, phone):
-        if re.search('[+]?\d+', phone):
+        if re.search('^[+]?[0-9-.\s()]+$', phone):
             self._phones_list.append(phone)
         else:
-            raise CustomException('Wrong phone number format')
+            raise CustomException('Wrong phone number format. Available characters: +|digits|space|-|()|.|')
 
     @property
     def address(self):
