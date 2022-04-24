@@ -142,7 +142,7 @@ def prepare_value(command_line):
 @input_error
 def add_name(command_line):  # если имя уже существует?
     if command_line:
-        name = ' '.join(command_line).lower()
+        name = ' '.join(command_line)
         record = Record(name)
         contacts[name] = record
         return f'Contact with the name "{name}" has been successfully added'
