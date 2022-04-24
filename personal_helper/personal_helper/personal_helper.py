@@ -14,7 +14,7 @@ class AddressBook(UserDict):
         if self.data.get(name):
             return self.data.get(name)
         else:
-            raise CustomException('Such contacts name doesn\'t exist (Command format: <command> <name> <infornation>)')
+            raise CustomException('Such contacts name doesn\'t exist (Command format: <command> <name> <information>)')
 
     def load_from_file(self, file_name):
         if os.path.exists(file_name):
