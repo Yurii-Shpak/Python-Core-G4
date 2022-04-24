@@ -14,7 +14,7 @@ class AddressBook(UserDict):
         if self.data.get(name):
             return self.data.get(name)
         else:
-            raise CustomException('Such contacts name doesn\'t exist')
+            raise CustomException('Such contacts name doesn\'t exist (Command format: <command> <name> <infornation>)')
 
     def load_from_file(self, file_name):
         if os.path.exists(file_name):
@@ -123,7 +123,7 @@ def prepare_value(command_line):#если нет имени, будет ошиб
         value = ' '.join(command_line)
         return key, value
     else:
-        raise CustomException('With command must to be INFORMATION you want to add(Format: command Name information)')
+        raise CustomException('With command must to be INFORMATION you want to add (Commands format: <command> <name> <information>)')
     
 @input_error
 def add_name(command_line):#если имя уже существует?
@@ -132,7 +132,7 @@ def add_name(command_line):#если имя уже существует?
         record = Record(name = name)
         contacts[record.name] = record
     else:
-        raise CustomException('With command must to be NAME you want to add (Format: add Name)')
+        raise CustomException('With command must to be NAME you want to add (Format: <add> <name>)')
 
 @input_error
 def add_address(command_line):
