@@ -100,7 +100,7 @@ def input_error(func):
         except:
             if func.__name__ == 'save_func':
                 result = f'Error while saving.'
-                
+              
         return result
 
     return inner
@@ -131,6 +131,7 @@ def add_name(command_line):#если имя уже существует?
         name = ' '.join(command_line).lower()
         record = Record(name = name)
         contacts[record.name] = record
+        return f'Contacts name has been successfully added!!!'
     else:
         raise CustomException('With command must to be NAME you want to add (Format: <add> <name>)')
 
@@ -138,22 +139,32 @@ def add_name(command_line):#если имя уже существует?
 def add_address(command_line):
     key, address = prepare_value(command_line)
     contacts.get_record(key).address = address
+    return f'Contacts address has been successfully added'
 
 @input_error
 def add_birthday(command_line):
     key, birthday = prepare_value(command_line)
     contacts.get_record(key).birthday = birthday
+    return f'Contacts birthday date has been successfully added'
 
 @input_error
 def add_email(command_line):
     key, email = prepare_value(command_line)
     contacts.get_record(key).email = email
+    return f'Contacts email has been successfully added'
 
 @input_error
 def add_phone(command_line):
     key, phone = prepare_value(command_line)
     if not phone in contacts.get_record(key).phones_list:
         contacts.get_record(key).append_phone(phone)
+        return f'Contacts phone number has been successfully added'
+    else:
+        raise CustomException('Such phone number has been already added')
+        
+@input_error
+def birthday_list(command_line):
+    return contacts.values()
 
 
 COMMANDS = {
@@ -165,11 +176,12 @@ COMMANDS = {
     'add address': add_address,
     'add birthday': add_birthday,
     'add email': add_email,
-    'add phone': add_phone
+    'add phone': add_phone,
+    'birthday list': birthday_list
 }
 
 ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save']
-TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone', 'good bye']
+TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone', 'birthday list', 'good bye']
 
 
 def get_handler(command):
