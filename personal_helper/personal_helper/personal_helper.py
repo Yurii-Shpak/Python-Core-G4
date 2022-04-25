@@ -2,6 +2,7 @@ from collections import UserDict
 import os.path
 import pickle
 import re
+from datetime import datetime
 
 
 class CustomException(Exception):
@@ -208,6 +209,7 @@ def add_phone(command_line):
     else:
         raise CustomException('Such phone number has been already added!!!')
 
+
 @input_error
 def remove(command_line):
     key, _ = prepare_value(command_line)
@@ -217,12 +219,14 @@ def remove(command_line):
     else:
         raise CustomException('Such contact does not exist!!!')
 
+
 @input_error
 def delete_address(command_line):
     key, _ = prepare_value(command_line)
     address = contacts.get_record(key).address
     contacts.get_record(key).delete_address()
     return f'Contacts address {address} for {key} has been successfully deleted'
+
 
 @input_error
 def delete_birthday(command_line):
@@ -231,12 +235,14 @@ def delete_birthday(command_line):
     contacts.get_record(key).delete_birthday()
     return f'Contacts birthday date {birthday} for {key} has been successfully deleted'
 
+
 @input_error
 def delete_email(command_line):
     key, _ = prepare_value(command_line)
     email = contacts.get_record(key).email
     contacts.get_record(key).delete_email()
     return f'Contacts {email} for {key} has been successfully deleted'
+
 
 @input_error
 def delete_phone(command_line):
@@ -249,11 +255,13 @@ def delete_phone(command_line):
     else:
         raise CustomException('Such contact does not exist!!!')
 
+
 @input_error
 def change_email(command_line):
     key, email = prepare_value(command_line)
     contacts.get_record(key).email = email
     return f'Contacts email {key} has been successfully changed to {email}'
+
 
 @input_error
 def change_birthday(command_line):
@@ -261,11 +269,13 @@ def change_birthday(command_line):
     contacts.get_record(key).birthday = birthday
     return f'Contacts birthday {key} has been successfully changed to {birthday}'
 
+
 @input_error
 def change_address(command_line):
     key, address = prepare_value(command_line)
     contacts.get_record(key).address = address
     return f'Contacts address {key} has been successfully changed to {address}'
+
 
 @input_error
 def change_phone(command_line):
@@ -283,14 +293,225 @@ def change_phone(command_line):
     else:
         raise CustomException('Such contact does not exist!!!')
 
+
 @input_error
 def coming_birthday(command_line=7):  # in progress
     list_bithday = [i for i in contacts.get_values_list()]
     return contacts.get_values_list()
 
+ # блок кода касающийся заметок###########
+
+@input_error
+def add_note(command_line):
+    """ Сама структура заметок это обычный текстовый файл, каждая строка
+        которого это есть одна заметка
+        В качестве идентификатора выступет дата и время создания заметки,
+        приведенные к строковому виду - чтобы файл можно было открывать
+        обычным текстовым редактором. Далее этот идентификатор используется
+        для индексации по заметкам (редактирование, удаление, поиск)
+    """
+    note = ' '.join(command_line)
+    current_id = datetime.now()
+    # преобразовали в строку дату время создания
+    crt = current_id.strftime("%d.%m.%Y - %H:%M:%S")
+    with open("note.txt", "a+") as file:
+        file.write(crt+" :: "+note+"\n")  # первые 21 символ - строка
+    return "The note is added."
+
+
+@input_error
+def find_note(command_line):
+    """ Поиск задается по трем переменным
+        ключевое слово - без этого слова заметка не интересует
+        дата старта - ранее этой даты заметки не интересуют
+        дата конца - позже этой даты заметки не интересуют
+
+        сейчас ограничиваем поиск датами, но не временем. Исключительно для удобства пользователя
+        после вывода массива заметок он найдет интересующую, скопирует ее полный идентификатор и перейдет к ней
+        непосредственно, если нужно
+    """
+    # разбираем команду в формат (keyword:str, start:'start date' = '', end:'end_date' = ''):
+    if len(command_line) >= 3:
+        keyword = command_line[0].lower()
+        start = command_line[1]
+        end = command_line[2]
+    elif len(command_line) == 2:
+        keyword = command_line[0].lower()
+        start = command_line[1]
+        end = ''
+    elif len(command_line) == 1:
+        keyword = command_line[0].lower()
+        start = ''
+        end = ''
+    else:
+        keyword = ''
+        start = ''
+        end = ''
+
+    try:
+        start_date = datetime.strptime(start, "%d.%m.%Y")
+    except:
+        print("Search start date is not stated in the DD.MM.YYYY format. The search will be performed from the first note.")
+        # начало поиска с даты начала Эпохи
+        start_date = datetime.strptime("01.01.1970", "%d.%m.%Y")
+
+    try:
+        end_date = datetime.strptime(end, "%d.%m.%Y")
+    except:
+        print("Search end date is not stated in the DD.MM.YYYY format. The search will be performed till the last note.")
+        end_date = datetime.now()   # конец поиска до текущего момента
+
+    if (type(keyword) == str) and (keyword != ''):
+        pass
+    else:
+        print("The keyword is not stated. The search will be performed for all notes.")
+
+    with open("note.txt", "r+") as file:
+        lines = file.readlines()  # список строк из файла заметок
+
+    msg = "No one note is found"
+    for i in lines:
+        date_id = i[:10]  # вырезали кусок строки - дата создание заметки
+        # конверт в объект, чтобы сравнивать
+        n_id = datetime.strptime(date_id, "%d.%m.%Y")
+        if (n_id >= start_date) and (n_id <= end_date):
+            if (type(keyword) == str) and (keyword != ''):
+                j = i.lower()      # приводим оригинальную строку к нижнеему регистру
+                # если есть ключ(нижний регистр) в строке (нижний регистр ) выводим оригинальную
+                if keyword in j:
+                    # забили последний символ переноса строки - для красивого вывода
+                    print(i[:len(i)-1])
+                    msg = "Notes are found"
+            else:
+                print(i[:len(i)-1])  # выводим все строки - нет ключа
+                msg = "Notes are found"
+    return msg
+
+
+@input_error
+def change_note(command_line):
+    """Для изменения заметки нужно дать аргументом ее полный идентификатор со временем,
+       его удобно скопировать после общего поиска
+       а также данные которые должны быть записаны в эту заметку с этим же идентификатором
+
+    """
+    # разбираем команду в формат (dt_id:"%d.%m.%Y - %H:%M:%S" = '', data:str = '')
+    if len(command_line) >= 4:
+        dt_id = command_line[0]+' '+command_line[1]+' '+command_line[2]
+        command_line.pop(0)
+        command_line.pop(0)
+        command_line.pop(0)
+        data = ' '.join(command_line)
+    elif len(command_line) == 3:
+        dt_id = command_line[0]+command_line[1]+command_line[2]
+        data = ''
+    else:
+        dt_id = ''
+        data = ''
+
+    msg = "No one note is changed"
+    try:
+        # проверка что идентификатор задан в формате
+        loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S")
+        try:
+            with open("note.txt", "r") as file:
+                buffer = file.readlines()
+            for i in range(len(buffer)):
+                d_id = buffer[i][:21]  # полный идентификатор
+                n_id = datetime.strptime(d_id, "%d.%m.%Y - %H:%M:%S")
+                if n_id == loc_id:  # совпадение текущего ид с заданным
+                    if data != '':
+                        # замена строки, идентификатор остается
+                        buffer[i] = d_id+" :: "+data+"\n"
+                        msg = "The note is changed"
+                        break
+                    else:
+                        in_q = input(
+                            "The field for change is empty. Are you sure? y or n")
+                        if in_q == 'y':
+                            # замена строки, идентификатор остается
+                            buffer[i] = d_id+" :: "+data+"\n"
+                            msg = "The note is changed"
+                        break
+            with open("note.txt", "w") as file:  # удаляем содержимое старого файла, пишем заново
+                file.writelines(buffer)  # пишем построчно из буфера
+        except:
+            print("ID selection error. Maybe the reason is manual file editing.")
+
+    except:
+        print("The ID is not in the DD.MM.YYYY - HH.MM.SS formt. Copy ID from the search results.")
+    return msg
+
+
+@input_error
+def delete_note(command_line):
+    """Для удаления заметки нужно дать аргументом ее полный идентификатор со временем,
+       его удобно скопировать после общего поиска - вместе с кавычками
+    """
+    # разбираем команду в формат (dt_id:"%d.%m.%Y - %H:%M:%S" = '')
+    if len(command_line) == 3:
+        dt_id = command_line[0]+' '+command_line[1]+' '+command_line[2]
+    else:
+        dt_id = ''
+
+    msg = "No one note is deleted"
+    try:
+        # проверка что идентификатор задан в формате
+        loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S")
+        try:
+            with open("note.txt", "r") as file:
+                buffer = file.readlines()
+            for i in range(len(buffer)):
+                d_id = buffer[i][:21]  # полный идентификатор
+                n_id = datetime.strptime(d_id, "%d.%m.%Y - %H:%M:%S")
+                if n_id == loc_id:  # совпадение текущего ид с заданным
+                    buffer.pop(i)
+                    msg = "The note is deleted"
+                    break
+            with open("note.txt", "w") as file:  # удаляем содержимое старого файла, пишем заново
+                file.writelines(buffer)  # пишем построчно из буфера
+        except:
+            print("ID selection error. Maybe the reason is manual file editing.")
+
+    except:
+        print("The ID is not in the DD.MM.YYYY - HH.MM.SS formt. Copy ID from the search results.")
+    return msg
+
+
+@input_error
+def tag_note(command_line):
+    pass
+
+
+@input_error
+def help_common(command_line):
+
+    try:
+        file = open("help.txt", 'r')
+        help_lines = file.readlines()
+        for i in help_lines:
+            # забили последний символ переноса строки - для красивого вывода
+            print(i[:len(i)-1])
+        file.close()
+        msg = "The end of the help."
+    except:
+        msg = "The file help.txt is not found."
+    return msg
+
+
+def start_note():  # проверка что файл существует или его создание
+
+    try:
+        file = open("note.txt", 'r')
+        print("The file note.txt with notes is loaded.")
+    except:
+        file = open("note.txt", 'w')  # создаем новый
+        print("The file note.txt with notes is created.")
+    finally:
+        file.close()
+
 @input_error
 def show_all(command_line):
-
     contact_book = ''
     for name, record in contacts.items():
         phones = record.phones_list
@@ -326,6 +547,12 @@ COMMANDS = {
     'change address': change_address,
     'change phone': change_phone,
     'coming birthday': coming_birthday,
+    "add note": add_note,
+    "find note": find_note,
+    "change note": change_note,
+    "delete note": delete_note,
+    "tag note": tag_note,
+    "hlp me": help_common,
     'show all': show_all,
     'find': find_contact,
 }
@@ -334,7 +561,8 @@ ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove', 'find']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone',
                       'delete address', 'delete birthday', 'delete email', 'delete phone',
                       'change email', 'change birthday', 'change address', 'change phone',
-                      'coming birthday', 'good bye', 'show all']
+                      'coming birthday', 'good bye', "add note", "find note", "change note",
+                      "delete note", "tag note", "hlp me", 'show all']
 
 
 def get_handler(command):
@@ -343,6 +571,7 @@ def get_handler(command):
 
 def main():
 
+    start_note()
     print(contacts.load_from_file('contacts.bin'))
 
     while True:
