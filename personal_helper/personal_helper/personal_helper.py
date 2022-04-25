@@ -84,6 +84,11 @@ class AddressBook(UserDict):
         else:
             return f'No record found.'
 
+    def __repr__(self):
+        result = ""
+        for key in self.data.keys():
+            result += str(self.data.get(key))
+        return result
 
 contacts = AddressBook()
 
@@ -149,6 +154,17 @@ class Record:
     def delete_birthday(self):
         self._birthday = None
 
+    def __repr__(self):
+        name = self.name
+        email = '---' if self.email == None else self.email
+        address = '---' if self.address == None else self.address
+        birthday = '---' if self.birthday == None else self.birthday
+
+        if len(self.phones_list) == 0:
+            phones = '---'
+        else:
+            phones = ', '.join(self.phones_list)
+        return f'\nName: {name}, Address: {address} , Phones: {phones}, Email: {email}, Date of birth: {birthday},'
 
 def input_error(func):
     def inner(command_line):
@@ -177,6 +193,16 @@ def input_error(func):
                 result = f'Error while deleting email.'
             elif func.__name__ == 'delete_phone':
                 result = f'Error while deleting phone.'
+            elif func.__name__ == 'change_address':
+                result = f'Error while changing address.'
+            elif func.__name__ == 'change_birthday':
+                result = f'Error while changing birthday.'
+            elif func.__name__ == 'change_email':
+                result = f'Error while changing email.'
+            elif func.__name__ == 'change_phone':
+                result = f'Error while changing phone.'
+            elif func.__name__ == 'search':
+                result = f'Error while searching.'
 
         return result
 
@@ -203,6 +229,23 @@ def prepare_value(command_line):
         raise CustomException(
             'With command must to be INFORMATION you want to add (Commands format: <command> <name> <information>)')
 
+def prepare_value_1(command_line):
+    if command_line:
+        value = ''
+        key = ' '.join(command_line)
+        return key, value
+    else:
+        raise CustomException(
+            'With command must to be INFORMATION you want to add (Commands format: <command> <name>)')
+
+def prepare_value_2(command_line):
+    if command_line:
+        key = ' '.join(command_line)
+        value = input('Enter phones to replace >>> ')
+        return key, value
+    else:
+        raise CustomException(
+            'With command add address must to be name (Commands format: <command> <name>)')
 
 def prepare_value_3(command_line):
     if command_line:
@@ -296,7 +339,7 @@ def remove(command_line):
 
 @input_error
 def delete_address(command_line):
-    key, _ = prepare_value(command_line)
+    key, value = prepare_value_1(command_line)
     address = contacts.get_record(key).address
     contacts.get_record(key).delete_address()
     return f'Contacts address {address} for {key} has been successfully deleted'
@@ -304,8 +347,8 @@ def delete_address(command_line):
 
 @input_error
 def search(command_line):
-    key, _ = prepare_value(command_line)
-    return contacts.search(key)
+    key, value = prepare_value(command_line)
+    return contacts.search(value)
 
 
 @input_error
@@ -316,7 +359,7 @@ def coming_birthday(command_line=7):  # in progress
 
 @input_error
 def delete_birthday(command_line):
-    key, _ = prepare_value(command_line)
+    key, value = prepare_value_1(command_line)
     birthday = contacts.get_record(key).birthday
     contacts.get_record(key).delete_birthday()
     return f'Contacts birthday date {birthday} for {key} has been successfully deleted'
@@ -324,7 +367,7 @@ def delete_birthday(command_line):
 
 @input_error
 def delete_email(command_line):
-    key, _ = prepare_value(command_line)
+    key, value = prepare_value_1(command_line)
     email = contacts.get_record(key).email
     contacts.get_record(key).delete_email()
     return f'Contacts {email} for {key} has been successfully deleted'
@@ -332,7 +375,7 @@ def delete_email(command_line):
 
 @input_error
 def delete_phone(command_line):
-    key, phone = prepare_value(command_line)
+    key, phone = prepare_value_2(command_line)
     if phone in contacts.get_record(key).phones_list:
         ix = contacts.get_record(key).phones_list.index(phone)
         if ix >= 0:
@@ -358,19 +401,20 @@ def change_birthday(command_line):
 
 @input_error
 def change_address(command_line):
-    key, address = prepare_value(command_line)
+    key, address = prepare_value_3(command_line)
     contacts.get_record(key).address = address
     return f'Contacts address {key} has been successfully changed to {address}'
 
 
 @input_error
 def change_phone(command_line):
-    key, phone = prepare_value(command_line)
+    key, phone = prepare_value_2(command_line)
     phones = phone.split()
     if len(phones) != 2:
         raise CustomException(
             '''The command must be with a NAME and 2 phones you want to change 
-            (Format: <change> <name> <old phone> <new phone>)''')
+            (Format: <change phone> <name> 
+            >>> <old phone> <new phone>)''')
     if phones[0] in contacts.get_record(key).phones_list:
         ix = contacts.get_record(key).phones_list.index(phones[0])
         if ix >= 0:
@@ -666,12 +710,13 @@ def main():
     while True:
         command_line = []
         while not command_line:
-            command_line = prompt('>>> ',
-                                  history=FileHistory('history'),
-                                  auto_suggest=AutoSuggestFromHistory(),
-                                  completer=SqlCompleter,
-                                  style=style
-                                  ).split()
+            # command_line = prompt('>>> ',
+            #                       history=FileHistory('history'),
+            #                       auto_suggest=AutoSuggestFromHistory(),
+            #                       completer=SqlCompleter,
+            #                       style=style
+            #                       ).split()
+            command_line = input('>>> ').split()
 
         right_command = False
 
