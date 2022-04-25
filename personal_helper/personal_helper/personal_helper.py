@@ -24,6 +24,13 @@ class AddressBook(UserDict):
             raise CustomException(
                 'Such contacts name doesn\'t exist (Command format: <command> <name> <information>)')
 
+    def remove(self, name):
+        if self.data.get(name):
+            self.data.pop(name)
+        else:
+            raise CustomException(
+                'Such contacts name doesn\'t exist (Command format: <command> <name> <information>)')
+
     def load_from_file(self, file_name):
         if os.path.exists(file_name):
             with open(file_name, 'rb') as fh:
@@ -49,7 +56,7 @@ class Record:
     def __init__(self, name, address=None, phones_list=None, email=None, birthday=None):
         self.name = name
         self._address = address
-        self._phones_list = phones_list
+        self._phones_list = []
         self._email = email
         self._birthday = birthday
 
@@ -68,6 +75,9 @@ class Record:
     def address(self, address):
         self._address = address
 
+    def delete_address(self):
+        self._address = None
+
     @property
     def phones_list(self):
         return self._phones_list
@@ -84,6 +94,9 @@ class Record:
             raise CustomException(
                 'Wrong email format. Should be as same as: aaaa@ddd.cc')
 
+    def delete_email(self):
+        self._email = None
+
     @property
     def birthday(self):
         return self._birthday
@@ -95,6 +108,9 @@ class Record:
         else:
             raise CustomException(
                 'Wrong date format. Should be as same as: dd.mm.yyyy')
+
+    def delete_birthday(self):
+        self._birthday = None
 
 
 def input_error(func):
@@ -110,6 +126,16 @@ def input_error(func):
         except:
             if func.__name__ == 'save_func':
                 result = f'Error while saving.'
+            elif func.__name__ == 'remove':
+                result = f'Error while removing record.'
+            elif func.__name__ == 'delete_address':
+                result = f'Error while deleting address.'
+            elif func.__name__ == 'delete_birthday':
+                result = f'Error while deleting birthday.'
+            elif func.__name__ == 'delete_email':
+                result = f'Error while deleting email.'
+            elif func.__name__ == 'delete_phone':
+                result = f'Error while deleting phone.'
 
         return result
 
@@ -182,6 +208,80 @@ def add_phone(command_line):
     else:
         raise CustomException('Such phone number has been already added!!!')
 
+@input_error
+def remove(command_line):
+    key, _ = prepare_value(command_line)
+    if contacts.get_record(key):
+        contacts.remove(key)
+        return f'Contact {key} has been successfully removed'
+    else:
+        raise CustomException('Such contact does not exist!!!')
+
+@input_error
+def delete_address(command_line):
+    key, _ = prepare_value(command_line)
+    address = contacts.get_record(key).address
+    contacts.get_record(key).delete_address()
+    return f'Contacts address {address} for {key} has been successfully deleted'
+
+@input_error
+def delete_birthday(command_line):
+    key, _ = prepare_value(command_line)
+    birthday = contacts.get_record(key).birthday
+    contacts.get_record(key).delete_birthday()
+    return f'Contacts birthday date {birthday} for {key} has been successfully deleted'
+
+@input_error
+def delete_email(command_line):
+    key, _ = prepare_value(command_line)
+    email = contacts.get_record(key).email
+    contacts.get_record(key).delete_email()
+    return f'Contacts {email} for {key} has been successfully deleted'
+
+@input_error
+def delete_phone(command_line):
+    key, phone = prepare_value(command_line)
+    if phone in contacts.get_record(key).phones_list:
+        ix = contacts.get_record(key).phones_list.index(phone)
+        if ix >= 0:
+            contacts.get_record(key).phones_list.pop(ix)
+        return f'Contacts {phone} has been successfully deleted'
+    else:
+        raise CustomException('Such contact does not exist!!!')
+
+@input_error
+def change_email(command_line):
+    key, email = prepare_value(command_line)
+    contacts.get_record(key).email = email
+    return f'Contacts email {key} has been successfully changed to {email}'
+
+@input_error
+def change_birthday(command_line):
+    key, birthday = prepare_value(command_line)
+    contacts.get_record(key).birthday = birthday
+    return f'Contacts birthday {key} has been successfully changed to {birthday}'
+
+@input_error
+def change_address(command_line):
+    key, address = prepare_value(command_line)
+    contacts.get_record(key).address = address
+    return f'Contacts address {key} has been successfully changed to {address}'
+
+@input_error
+def change_phone(command_line):
+    key, phone = prepare_value(command_line)
+    phones = phone.split()
+    if len(phones) != 2:
+        raise CustomException(
+            '''The command must be with a NAME and 2 phones you want to change 
+            (Format: <change> <name> <old phone> <new phone>)''')
+    if phones[0] in contacts.get_record(key).phones_list:
+        ix = contacts.get_record(key).phones_list.index(phones[0])
+        if ix >= 0:
+            contacts.get_record(key).phones_list[ix] = phones[1]
+        return f'Contacts phone {key} has been successfully changed to {phones[1]}'
+    else:
+        raise CustomException('Such contact does not exist!!!')
 
 @input_error
 def coming_birthday(command_line=7):  # in progress
@@ -212,14 +312,25 @@ COMMANDS = {
     'add birthday': add_birthday,
     'add email': add_email,
     'add phone': add_phone,
+    'remove': remove,
+    'delete address': delete_address,
+    'delete birthday': delete_birthday,
+    'delete email': delete_email,
+    'delete phone': delete_phone,
+    'change email': change_email,
+    'change birthday': change_birthday,
+    'change address': change_address,
+    'change phone': change_phone,
     'coming birthday': coming_birthday,
     'show all': show_all,
     'find': find_contact,
 }
 
-ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'find']
-TWO_WORDS_COMMANDS = ['add address', 'add birthday',
-                      'add email', 'add phone', 'coming birthday', 'good bye', 'show all']
+ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove', 'find']
+TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone',
+                      'delete address', 'delete birthday', 'delete email', 'delete phone',
+                      'change email', 'change birthday', 'change address', 'change phone',
+                      'coming birthday', 'good bye', 'show all']
 
 
 def get_handler(command):

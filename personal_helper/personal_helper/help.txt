@@ -1,0 +1,23 @@
+"""
+    Please select any command from listed below with examples:
+    'close': exit,
+    'exit': exit,
+    'good bye': exit,
+    'save': save,
+    'add': add Sasha, add Pasha
+    'add address': add address Sasha Kyiv,
+    'add birthday': add birthday Sasha 01.05.1985,
+    'add email': add email Sasha sania.kyiv@gmail.com,
+    'add phone': add phone Sasha (050)555-33-22, add phone Sasha (093)333-77-11
+    'remove': remove Sasha,
+    'delete address': delete address Sasha,
+    'delete birthday': delete birthday Sasha,
+    'delete email': delete email Sasha,
+    'delete phone': delete phone Sasha (050)555-33-22,
+    'change email': change email Sasha alex.lviv@gmail.com,
+    'change birthday': change birthday Sasha 02.05.1985,
+    'change address': change address Sasha Lviv,
+    'change phone': change phone Sasha (050)555-33-22 (050)111-33-22,
+    'coming birthday': coming birthday 7,
+    "help": help
+    """
