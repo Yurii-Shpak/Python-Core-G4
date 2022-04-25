@@ -12,7 +12,7 @@ class CustomException(Exception):
 
 
 class AddressBook(UserDict):
-
+   
     def get_values_list(self):
         if self.data:
             return self.data.values()
@@ -209,6 +209,7 @@ def add_email(command_line):
 
 @input_error
 def add_phone(command_line):
+    print(command_line)
     key, phone = prepare_value(command_line)
     if not phone in contacts.get_record(key).phones_list:
         contacts.get_record(key).append_phone(phone)
@@ -325,7 +326,6 @@ def change_phone(command_line):
         raise CustomException('Such contact does not exist!!!')
 
  # блок кода касающийся заметок###########
-
 
 @input_error
 def add_note(command_line):
@@ -536,7 +536,30 @@ def start_note():  # проверка что файл существует ил�
     finally:
         file.close()
 
+# @input_error
+def show_all(command_line):
 
+    result = ''
+
+    for name, record in contacts.items():
+        result = form_record(name, record, result)    
+
+    return result
+
+def form_record(name, record, result):
+
+    email = '---' if record.email == None else record.email
+    address = '---' if record.address == None else record.address
+    birthday = '---' if record.birthday == None else record.birthday
+        
+    if len(record.phones_list) == 0:
+        phones = '---'
+    else:
+        phones = ', '.join(record.phones_list)
+
+    result += f'\nName: {name}, Address: {address} , Phones: {phones}, Email: {email}, Date of birth: {birthday},'
+    return result
+    
 COMMANDS = {
     'close': exit_func,
     'exit': exit_func,
@@ -562,7 +585,8 @@ COMMANDS = {
     "change note": change_note,
     "delete note": delete_note,
     "tag note": tag_note,
-    "hlp me": help_common
+    "hlp me": help_common,
+    'show all': show_all,
 }
 
 ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove']
@@ -570,7 +594,7 @@ TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone',
                       'delete address', 'delete birthday', 'delete email', 'delete phone',
                       'change email', 'change birthday', 'change address', 'change phone',
                       'coming birthday', 'good bye', "add note", "find note", "change note",
-                      "delete note", "tag note", "hlp me"]
+                      "delete note", "tag note", "hlp me", 'show all']
 
 
 def get_handler(command):
