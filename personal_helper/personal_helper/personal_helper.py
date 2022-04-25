@@ -2,7 +2,7 @@ from collections import UserDict
 import os.path
 import pickle
 import re
-
+from datetime import datetime
 
 class CustomException(Exception):
     def __init__(self, text):
@@ -287,6 +287,165 @@ def coming_birthday(command_line=7):  # in progress
     list_bithday = [i for i in contacts.get_values_list()]
     return contacts.get_values_list()
 
+ # блок кода касающийся заметок###########
+@input_error
+def add_note(command_line):
+    """ Сама структура заметок это обычный текстовый файл, каждая строка
+        которого это есть одна заметка
+        В качестве идентификатора выступет дата и время создания заметки,
+        приведенные к строковому виду - чтобы файл можно было открывать
+        обычным текстовым редактором. Далее этот идентификатор используется
+        для индексации по заметкам (редактирование, удаление, поиск)
+    """
+    note = ' '.join(command_line)
+    current_id = datetime.now()
+    crt = current_id.strftime("%d.%m.%Y - %H:%M:%S") # преобразовали в строку дату вемя создания
+    with open("note.txt", "a+") as file:
+        file.write(crt+" :: "+note+"\n")  # первые 21 символ - строка
+    return "note added"
+
+@input_error
+def find_note(command_line):
+    """ Поиск задается по трем переменным
+        ключевое слово - без этого слова заметка не интересует
+        дата старта - ранее этой даты заметки не интересуют
+        дата конца - позже этой даты заметки не интересуют
+
+        сейчас ограничиваем поиск датами, но не временем. Исключительно для удобства пользователя
+        после вывода массива заметок он найдет интересующую, скопирует ее полный идентификатор и перейдет к ней
+        непосредственно, если нужно
+    """
+     # разбираем команду в формат (keyword:str, start:'start date' = '', end:'end_date' = ''):
+    if len(command_line) >= 3:
+        keyword = command_line[0]
+        start = command_line[1]
+        end = command_line[2]
+    elif len(command_line) == 2:
+        keyword = command_line[0]
+        start = command_line[1]
+        end = ''
+    elif len(command_line) == 1:
+        keyword = command_line[0]
+        start = ''
+        end = ''
+    else:
+        keyword = ''
+        start = ''
+        end = ''
+
+    try:
+        start_date = datetime.strptime(start, "%d.%m.%Y")
+    except:
+        print("Дата старта поиска задано не в формате dd.mm.YYYY, будет\
+ проведен поиск с начала")
+        start_date = datetime.strptime("01.01.1970", "%d.%m.%Y")  # начало поиска с даты начала Эпохи
+
+    try:
+        end_date = datetime.strptime(end, "%d.%m.%Y")
+    except:
+        print("Дата конца поиска задано не в формате dd.mm.YYYY, будет\
+ проведен поиск до конца")
+        end_date = datetime.now()   # конец поиска до текущего момента
+        
+    if (type(keyword) == str) and (keyword != ''):
+        pass
+    else:
+        print("Ключевое слово для поиска не задано поиск по всем заметкам")
+
+    with open("note.txt", "r+") as file:
+        lines = file.readlines()            #список строк из файла заметок
+
+    for i in lines:
+       date_id = i[:10] # вырезали кусок строки - дата создание заметки
+       n_id = datetime.strptime(date_id, "%d.%m.%Y") # конверт в объект, чтобы сравнивать
+       if (n_id >= start_date) and (n_id <= end_date):
+           if (type(keyword) == str) and (keyword != ''):
+               if keyword in i:        # если есть ключ в строке выводим
+                   print(i[:len(i)-1]) #забили последний символ переноса строки - для красивого вывода
+           else:
+               print(i[:len(i)-1]) #выводим все строки - нет ключа
+    return "note finded"
+
+@input_error
+def change_note(command_line):
+    """Для изменения заметки нужно дать аргументом ее полный идентификатор со временем,
+       его удобно скопировать после общего поиска
+       а также данные которые должны быть записаны в эту заметку с этим же идентификатором
+   
+    """
+    # разбираем команду в формат (dt_id:"%d.%m.%Y - %H:%M:%S" = '', data:str = '')
+    if len(command_line) >= 4:
+        dt_id = command_line[0]+' '+command_line[1]+' '+command_line[2]
+        data = command_line[3]
+    elif len(command_line) == 3:
+        dt_id = command_line[0]+command_line[1]+command_line[2]
+        data = ''
+    else:
+        dt_id = ''
+        data = ''
+        
+    try:
+        loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S") #проверка что идентификатор задан в формате
+        try:
+            with open("note.txt", "r") as file:
+                buffer = file.readlines()
+            for i in range(len(buffer)):
+                d_id = buffer[i][:21] #полный идентификатор
+                n_id = datetime.strptime(d_id, "%d.%m.%Y - %H:%M:%S")
+                if n_id == loc_id:  # совпадение текущего ид с заданным
+                    if data != '':
+                        buffer[i] = d_id+" :: "+data+"\n"  # замена строки, идентификатор остается
+                        break
+                    else:
+                        in_q = input("Поле для замены пустое, вы уверены y or n?")
+                        if in_q == 'y':
+                            buffer[i] = d_id+" :: "+data+"\n"  # замена строки, идентификатор остается
+                        break
+            with open("note.txt", "w") as file: #удаляем содержимое старого файла, пишем заново
+                file.writelines(buffer)  # пишем построчно из буфера
+        except:
+            print("ошибка выделения идентификатора, вероятно в результате ручного\
+ редактирования файла")
+                        
+    except:
+        print("Идентификатор задан не в формате dd.mm.YYYY - hh.mm.ss, скопируйте\
+ идентификатор из результатов поиска")
+    return "note changed"
+
+@input_error
+def delete_note(command_line):
+    """Для удаления заметки нужно дать аргументом ее полный идентификатор со временем,
+       его удобно скопировать после общего поиска - вместе с кавычками
+    """
+    # разбираем команду в формат (dt_id:"%d.%m.%Y - %H:%M:%S" = '')
+    if len(command_line) == 3:
+        dt_id = command_line[0]+' '+command_line[1]+' '+command_line[2]
+    else:
+        dt_id = ''
+        
+    try:
+        loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S") #проверка что идентификатор задан в формате
+        try:
+            with open("note.txt", "r") as file:
+                buffer = file.readlines()
+            for i in range(len(buffer)):
+                d_id = buffer[i][:21] #полный идентификатор
+                n_id = datetime.strptime(d_id, "%d.%m.%Y - %H:%M:%S")
+                if n_id == loc_id:  # совпадение текущего ид с заданным
+                    buffer.pop(i)
+                    break
+            with open("note.txt", "w") as file: #удаляем содержимое старого файла, пишем заново
+                file.writelines(buffer)  # пишем построчно из буфера
+        except:
+            print("ошибка выделения идентификатора, вероятно в результате ручного\
+ редактирования файла")
+                        
+    except:
+        print("Идентификатор задан не в формате dd.mm.YYYY - hh.mm.ss, скопируйте\
+ идентификатор из результатов поиска")
+    return "note deleted"
+    
+
 
 COMMANDS = {
     'close': exit_func,
@@ -307,14 +466,18 @@ COMMANDS = {
     'change birthday': change_birthday,
     'change address': change_address,
     'change phone': change_phone,
-    'coming birthday': coming_birthday
+    'coming birthday': coming_birthday,
+    "add note": add_note,
+    "find note": find_note,
+    "change note": change_note,
+    "delete note": delete_note 
 }
 
-ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone',
                       'delete address', 'delete birthday', 'delete email', 'delete phone',
                       'change email', 'change birthday', 'change address', 'change phone',
-                      'coming birthday', 'good bye']
+                      'coming birthday', 'good bye',
+                      "add note", "find note", "change note", "delete note"]
 
 
 def get_handler(command):
@@ -322,7 +485,13 @@ def get_handler(command):
 
 
 def main():
-
+    print("""
+Допустимые команды заботы с заметками
+add note string(opt)
+find note keyword(must) dd.mm.yyyy(opt - date start) dd.mm.yyyy(opt - date end)
+change note dd.mm.yyyy - hh.mm.ss(opt - id_note) string(opt - data for change)
+delete note dd.mm.yyyy - hh.mm.ss(opt - id_note)
+""")
     print(contacts.load_from_file('contacts.bin'))
 
     while True:
