@@ -5,6 +5,28 @@ import pickle
 import re
 from datetime import datetime
 
+#--------------------------------Prompt Toolkit-------------------------------
+from prompt_toolkit import prompt
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from prompt_toolkit.completion import WordCompleter
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.styles import Style
+
+SqlCompleter = WordCompleter([
+                      'add', 'close', 'exit', 'save', 'remove', 'add address', 'add birthday', 'add email', 'add phone',
+                      'delete address', 'delete birthday', 'delete email', 'delete phone',
+                      'change email', 'change birthday', 'change address', 'change phone',
+                      'coming birthday', 'good bye', "add note", "find note", "change note",
+                      "delete note", "tag note", "hlp me", 'show all'], ignore_case=True)
+
+style = Style.from_dict({
+    'completion-menu.completion': 'bg:#008888 #ffffff',
+    'completion-menu.completion.current': 'bg:#00aaaa #000000',
+    'scrollbar.background': 'bg:#88aaaa',
+    'scrollbar.button': 'bg:#222222',
+})                      
+#--------------------------------Prompt Toolkit-------------------------------
 
 class CustomException(Exception):
     def __init__(self, text):
@@ -609,7 +631,12 @@ def main():
     while True:
         command_line = []
         while not command_line:
-            command_line = input('>>> ').split()
+            command_line = prompt('>>> ',
+            history=FileHistory('history'),
+            auto_suggest=AutoSuggestFromHistory(),
+            completer=SqlCompleter,
+            style=style
+            ).split()
 
         right_command = False
 
