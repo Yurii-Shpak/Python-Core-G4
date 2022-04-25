@@ -11,7 +11,7 @@ class CustomException(Exception):
 
 
 class AddressBook(UserDict):
-
+   
     def get_values_list(self):
         if self.data:
             return self.data.values()
@@ -512,20 +512,26 @@ def start_note():  # проверка что файл существует ил�
 
 @input_error
 def show_all(command_line):
-    contact_book = ''
+
+    results = ''
+
     for name, record in contacts.items():
-        phones = record.phones_list
-        email = record.email
-        adress = record.adress
-        birthday = record.birthday
-        contact_book += f'Name: {name}, Address: {adress} , Phones: {phones}, Email: {email}, Date of birth: {birthday},'
+        email = '---' if record.email == None else record.email
+        address = '---' if record.address == None else record.address
+        birthday = '---' if record.birthday == None else record.birthday
+        
+        if len(record.phones_list) == 0:
+            phones = '---'
+        else:
+            phones = ', '.join(record.phones_list)
 
-    return print(contact_book)    
+        results += f'\nName: {name}, Address: {address} , Phones: {phones}, Email: {email}, Date of birth: {birthday},'
 
-@input_error
+    return results    
+
+# @input_error
 def find_contact(command_line):
-    print(command_line)
-    print(contacts)
+    print(command_line)          
     
 COMMANDS = {
     'close': exit_func,
