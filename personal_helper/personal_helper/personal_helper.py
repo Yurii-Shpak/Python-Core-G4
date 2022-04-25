@@ -192,6 +192,16 @@ def prepare_value(command_line):
         raise CustomException(
             'With command must to be INFORMATION you want to add (Commands format: <command> <name> <information>)')
 
+    
+def prepare_value_3(command_line):
+    if command_line:
+        key = ' '.join(command_line)
+        value = input('Enter you address >>> ')
+        return key, value
+    else:
+        raise CustomException(
+            'With command add address must to be name (Commands format: <command> <name>)')
+
 
 @input_error
 def add_name(command_line): 
@@ -210,7 +220,7 @@ def add_name(command_line):
 
 @input_error
 def add_address(command_line):# не работает если адресс, не одно слово!
-    key, address = prepare_value(command_line)
+    key, address = prepare_value_3(command_line)
     contacts.get_record(key).address = address
     return f'Contacts address has been successfully added'
 
@@ -231,7 +241,6 @@ def add_email(command_line):
 
 @input_error
 def add_phone(command_line):
-    print(command_line)
     key, phone = prepare_value(command_line)
     if not phone in contacts.get_record(key).phones_list:
         contacts.get_record(key).append_phone(phone)
