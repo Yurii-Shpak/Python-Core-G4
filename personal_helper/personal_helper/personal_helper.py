@@ -536,28 +536,29 @@ def start_note():  # проверка что файл существует ил�
     finally:
         file.close()
 
-@input_error
+# @input_error
 def show_all(command_line):
 
-    results = ''
+    result = ''
 
     for name, record in contacts.items():
-        email = '---' if record.email == None else record.email
-        address = '---' if record.address == None else record.address
-        birthday = '---' if record.birthday == None else record.birthday
+        result = form_record(name, record, result)    
+
+    return result
+
+def form_record(name, record, result):
+
+    email = '---' if record.email == None else record.email
+    address = '---' if record.address == None else record.address
+    birthday = '---' if record.birthday == None else record.birthday
         
-        if len(record.phones_list) == 0:
-            phones = '---'
-        else:
-            phones = ', '.join(record.phones_list)
+    if len(record.phones_list) == 0:
+        phones = '---'
+    else:
+        phones = ', '.join(record.phones_list)
 
-        results += f'\nName: {name}, Address: {address} , Phones: {phones}, Email: {email}, Date of birth: {birthday},'
-
-    return results    
-
-# @input_error
-def find_contact(command_line):
-    print(command_line)          
+    result += f'\nName: {name}, Address: {address} , Phones: {phones}, Email: {email}, Date of birth: {birthday},'
+    return result
     
 COMMANDS = {
     'close': exit_func,
@@ -586,10 +587,9 @@ COMMANDS = {
     "tag note": tag_note,
     "hlp me": help_common,
     'show all': show_all,
-    'find': find_contact,
 }
 
-ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove', 'find']
+ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone',
                       'delete address', 'delete birthday', 'delete email', 'delete phone',
                       'change email', 'change birthday', 'change address', 'change phone',
