@@ -290,18 +290,22 @@ def coming_birthday(command_line=7):  # in progress
 
 @input_error
 def show_all(command_line):
-    contact_book = contacts.get_values_list()
-    print(contact_book)
-    for key in contact_book:
 
-        print(key)  
-    return contacts  
+    contact_book = ''
+    for name, record in contacts.items():
+        phones = record.phones_list
+        email = record.email
+        adress = record.adress
+        birthday = record.birthday
+        contact_book += f'Name: {name}, Address: {adress} , Phones: {phones}, Email: {email}, Date of birth: {birthday},'
+
+    return print(contact_book)    
 
 @input_error
 def find_contact(command_line):
     print(command_line)
     print(contacts)
-
+    
 COMMANDS = {
     'close': exit_func,
     'exit': exit_func,
