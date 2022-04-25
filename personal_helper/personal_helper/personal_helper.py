@@ -5,7 +5,7 @@ import pickle
 import re
 from datetime import datetime
 
-#--------------------------------Prompt Toolkit-------------------------------
+# --------------------------------Prompt Toolkit-------------------------------
 from prompt_toolkit import prompt
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -14,8 +14,8 @@ from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit.styles import Style
 
 SqlCompleter = WordCompleter([
-                      'add', 'close', 'exit', 'save', 'remove', 'add address', 'add birthday', 'add email', 'add phone',
-                      'delete address', 'delete birthday', 'delete email', 'delete phone',
+    'add', 'close', 'exit', 'save', 'remove', 'add address', 'add birthday', 'add email', 'add phone',
+    'delete address', 'delete birthday', 'delete email', 'delete phone',
                       'change email', 'change birthday', 'change address', 'change phone',
                       'coming birthday', 'good bye', "add note", "find note", "change note",
                       "delete note", "tag note", "hlp me", 'show all'], ignore_case=True)
@@ -25,8 +25,9 @@ style = Style.from_dict({
     'completion-menu.completion.current': 'bg:#00aaaa #000000',
     'scrollbar.background': 'bg:#88aaaa',
     'scrollbar.button': 'bg:#222222',
-})                      
-#--------------------------------Prompt Toolkit-------------------------------
+})
+# --------------------------------Prompt Toolkit-------------------------------
+
 
 class CustomException(Exception):
     def __init__(self, text):
@@ -34,7 +35,7 @@ class CustomException(Exception):
 
 
 class AddressBook(UserDict):
-   
+
     def get_values_list(self):
         if self.data:
             return self.data.values()
@@ -89,7 +90,7 @@ class Record:
             self._phones_list.append(phone)
         else:
             raise CustomException(
-                'Wrong phone number format. Use (0XX)XXX-XX-XX format!')
+                'Wrong phone number format! Use (0XX)XXX-XX-XX format!')
 
     @property
     def address(self):
@@ -116,7 +117,7 @@ class Record:
             self._email = email
         else:
             raise CustomException(
-                'Wrong email format. Should be as same as: aaaa@ddd.cc')
+                'Wrong email format! Correct format is aaaa@ddd.cc')
 
     def delete_email(self):
         self._email = None
@@ -131,7 +132,7 @@ class Record:
             self._birthday = birthday
         else:
             raise CustomException(
-                'Wrong date format. Should be as same as: dd.mm.yyyy')
+                'Wrong date format! Correct format is DD.MM.YYYY')
 
     def delete_birthday(self):
         self._birthday = None
@@ -147,8 +148,8 @@ def input_error(func):
         except CustomException as warning_text:
             result = warning_text
 
-        except Exception as exc: 
- 
+        except Exception as exc:
+
             if func.__name__ == 'save_func':
                 result = f'Error while saving.'
             elif func.__name__ == 'add_birthday':
@@ -157,6 +158,14 @@ def input_error(func):
                 result = "Use a number for getting list of birthdays more than next 7 days"
             elif func.__name__ == 'remove':
                 result = f'Error while removing record.'
+            elif func.__name__ == 'change_address':
+                result = f'Error while changing address.'
+            elif func.__name__ == 'change_birthday':
+                result = f'Error while changing birthday.'
+            elif func.__name__ == 'change_email':
+                result = f'Error while changing email.'
+            elif func.__name__ == 'change_phone':
+                result = f'Error while changing phone.'
             elif func.__name__ == 'delete_address':
                 result = f'Error while deleting address.'
             elif func.__name__ == 'delete_birthday':
@@ -190,9 +199,9 @@ def prepare_value(command_line):
         return key, value
     else:
         raise CustomException(
-            'With command must to be INFORMATION you want to add (Commands format: <command> <name> <information>)')
+            'The command must be with INFORMATION you want to add or change (Format: <command> <name> <information>).')
 
-    
+
 def prepare_value_3(command_line):
     if command_line:
         key = ' '.join(command_line)
@@ -200,43 +209,44 @@ def prepare_value_3(command_line):
         return key, value
     else:
         raise CustomException(
-            'With command add address must to be name (Commands format: <command> <name>)')
+            'The command must be in the format: <command> <name>.')
 
 
 @input_error
-def add_name(command_line): 
+def add_name(command_line):
     if command_line:
         name = ' '.join(command_line)
         if name in contacts.keys():
-            raise CustomException(f'Contact with name "{name}" has been already added!!!')
+            raise CustomException(
+                f'Contact with name "{name}" has been already added!!!')
         else:
             record = Record(name)
             contacts[name] = record
-            return f'Contact with the name "{name}" has been successfully added'
+            return f'Contact with the name "{name}" has been successfully added.'
     else:
         raise CustomException(
-            'The command must be with a NAME you want to add (Format: <add> <name>)')
+            'The command must be with a NAME you want to add (Format: <add> <name>).')
 
 
 @input_error
-def add_address(command_line):# не работает если адресс, не одно слово!
+def add_address(command_line):  # не работает если адресс, не одно слово!
     key, address = prepare_value_3(command_line)
     contacts.get_record(key).address = address
-    return f'Contacts address has been successfully added'
+    return f'Address {address} for the contact "{key}" has been successfully added.'
 
 
 @input_error
 def add_birthday(command_line):
     key, birthday = prepare_value(command_line)
     contacts.get_record(key).birthday = birthday
-    return f'Contacts birthday date has been successfully added'
+    return f'Date of birth {birthday} for the contact "{key}" has been successfully added.'
 
 
 @input_error
 def add_email(command_line):
     key, email = prepare_value(command_line)
     contacts.get_record(key).email = email
-    return f'Contacts email has been successfully added'
+    return f'Email {email} for the contact "{key}" has been successfully added.'
 
 
 @input_error
@@ -244,29 +254,31 @@ def add_phone(command_line):
     key, phone = prepare_value(command_line)
     if not phone in contacts.get_record(key).phones_list:
         contacts.get_record(key).append_phone(phone)
-        return f'Contacts phone number has been successfully added'
+        return f'Phone number {phone} for the contact "{key}" has been successfully added.'
     else:
         raise CustomException('Such phone number has been already added!!!')
 
-    
+
 def create_for_print(birthdays_dict):
     to_show = []
     for date, names in list(birthdays_dict.items()):
-        to_show.append(f'{date.strftime("%A")}({date.strftime("%d.%m.%Y")}): {", ".join(names)}')
+        to_show.append(
+            f'{date.strftime("%A")}({date.strftime("%d.%m.%Y")}): {", ".join(names)}')
     to_show = "\n".join(to_show)
     return to_show
 
-    
+
 @input_error
-def coming_birthday(command_line):#можно задать другой диапазон вывода дней, по умолчанию 7
+# можно задать другой диапазон вывода дней, по умолчанию 7
+def coming_birthday(command_line):
     range_days = 7
     birthdays_dict = defaultdict(list)
     if command_line:
         range_days = int(command_line[0])
     current_date = datetime.now().date()
-    timedelta_filter = timedelta(days = range_days)
+    timedelta_filter = timedelta(days=range_days)
     for name, birthday in [(i.name, i.birthday) for i in contacts.get_values_list()]:
-        if name and birthday: # проверка на None
+        if name and birthday:  # проверка на None
             birthday_date = datetime.strptime(birthday, '%d.%m.%Y').date()
             current_birthday = birthday_date.replace(year=current_date.year)
             if current_date <= current_birthday <= current_date + timedelta_filter:
@@ -274,37 +286,47 @@ def coming_birthday(command_line):#можно задать другой диап
     return create_for_print(birthdays_dict)
 
 
+@input_error
 def remove(command_line):
-    key, _ = prepare_value(command_line)
+    key = ' '.join(command_line).strip()
     if contacts.get_record(key):
         contacts.remove(key)
-        return f'Contact {key} has been successfully removed'
+        return f'Contact "{key}" has been successfully removed.'
     else:
         raise CustomException('Such contact does not exist!!!')
 
 
 @input_error
 def delete_address(command_line):
-    key, _ = prepare_value(command_line)
-    address = contacts.get_record(key).address
-    contacts.get_record(key).delete_address()
-    return f'Contacts address {address} for {key} has been successfully deleted'
+    key = ' '.join(command_line).strip()
+    if key in contacts.keys():
+        address = contacts.get_record(key).address
+        contacts.get_record(key).delete_address()
+        return f'Address "{address}" for the contact "{key}" has been successfully deleted.'
+    else:
+        raise CustomException('Such contact does not exist!!!')
 
 
 @input_error
 def delete_birthday(command_line):
-    key, _ = prepare_value(command_line)
-    birthday = contacts.get_record(key).birthday
-    contacts.get_record(key).delete_birthday()
-    return f'Contacts birthday date {birthday} for {key} has been successfully deleted'
+    key = ' '.join(command_line).strip()
+    if key in contacts.keys():
+        birthday = contacts.get_record(key).birthday
+        contacts.get_record(key).delete_birthday()
+        return f'Date of birth {birthday} for the contact "{key}" has been successfully deleted.'
+    else:
+        raise CustomException('Such contact does not exist!!!')
 
 
 @input_error
 def delete_email(command_line):
-    key, _ = prepare_value(command_line)
-    email = contacts.get_record(key).email
-    contacts.get_record(key).delete_email()
-    return f'Contacts {email} for {key} has been successfully deleted'
+    key = ' '.join(command_line).strip()
+    if key in contacts.keys():
+        email = contacts.get_record(key).email
+        contacts.get_record(key).delete_email()
+        return f'Email {email} for the contact "{key}" has been successfully deleted.'
+    else:
+        raise CustomException('Such contact does not exist!!!')
 
 
 @input_error
@@ -314,23 +336,31 @@ def delete_phone(command_line):
         ix = contacts.get_record(key).phones_list.index(phone)
         if ix >= 0:
             contacts.get_record(key).phones_list.pop(ix)
-        return f'Contacts {phone} has been successfully deleted'
+        return f'Phone number {phone} for the contact "{key}" has been successfully deleted.'
     else:
-        raise CustomException('Such contact does not exist!!!')
+        raise CustomException('Such phone number does not exist!!!')
 
 
 @input_error
 def change_email(command_line):
     key, email = prepare_value(command_line)
-    contacts.get_record(key).email = email
-    return f'Contacts email {key} has been successfully changed to {email}'
+    if key in contacts.keys():
+        contacts.get_record(key).email = email
+        return f'Email for "{key}" has been successfully changed to {email}.'
+    else:
+        raise CustomException(
+            f'Contact "{key}" does not exist or you have not specified new email!!!')
 
 
 @input_error
 def change_birthday(command_line):
     key, birthday = prepare_value(command_line)
-    contacts.get_record(key).birthday = birthday
-    return f'Contacts birthday {key} has been successfully changed to {birthday}'
+    if key in contacts.keys():
+        contacts.get_record(key).birthday = birthday
+        return f'Date of birth for "{key}" has been successfully changed to {birthday}.'
+    else:
+        raise CustomException(
+            f'Contact "{key}" does not exist or you have not specified new date of birth!!!')
 
 
 @input_error
@@ -342,21 +372,30 @@ def change_address(command_line):
 
 @input_error
 def change_phone(command_line):
-    key, phone = prepare_value(command_line)
-    phones = phone.split()
+    phones = [command_line.pop(-1)]
+    phones.insert(0, command_line.pop(-1))
+    key = ' '.join(command_line).strip()
+    if key not in contacts.keys():
+        return f'Wrong name "{key}" or you have not specified the new phone number.'
     if len(phones) != 2:
         raise CustomException(
             '''The command must be with a NAME and 2 phones you want to change 
             (Format: <change> <name> <old phone> <new phone>)''')
-    if phones[0] in contacts.get_record(key).phones_list:
-        ix = contacts.get_record(key).phones_list.index(phones[0])
-        if ix >= 0:
-            contacts.get_record(key).phones_list[ix] = phones[1]
-        return f'Contacts phone {key} has been successfully changed to {phones[1]}'
+    if re.search('\(0\d{2}\)\d{3}-\d{2}-\d{2}', phones[1]):
+        if phones[0] in contacts.get_record(key).phones_list:
+            ix = contacts.get_record(key).phones_list.index(phones[0])
+            if ix >= 0:
+                contacts.get_record(key).phones_list[ix] = phones[1]
+            return f'Phone number for "{key}" has been successfully changed to {phones[1]}.'
+        else:
+            raise CustomException(
+                f'Phone number {phones[0]} does not exist!!!')
     else:
-        raise CustomException('Such contact does not exist!!!')
+        raise CustomException(
+            'Wrong phone number format. Use (0XX)XXX-XX-XX format!')
 
  # блок кода касающийся заметок###########
+
 
 @input_error
 def add_note(command_line):
@@ -426,7 +465,7 @@ def find_note(command_line):
     with open("note.txt", "r+") as file:
         lines = file.readlines()  # список строк из файла заметок
 
-    msg = "No one note is found"
+    msg = "No one note is found."
     for i in lines:
         date_id = i[:10]  # вырезали кусок строки - дата создание заметки
         # конверт в объект, чтобы сравнивать
@@ -438,10 +477,10 @@ def find_note(command_line):
                 if keyword in j:
                     # забили последний символ переноса строки - для красивого вывода
                     print(i[:len(i)-1])
-                    msg = "Notes are found"
+                    msg = "Notes are found."
             else:
                 print(i[:len(i)-1])  # выводим все строки - нет ключа
-                msg = "Notes are found"
+                msg = "Notes are found."
     return msg
 
 
@@ -466,7 +505,7 @@ def change_note(command_line):
         dt_id = ''
         data = ''
 
-    msg = "No one note is changed"
+    msg = "No one note is changed."
     try:
         # проверка что идентификатор задан в формате
         loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S")
@@ -552,7 +591,7 @@ def help_common(command_line):
         file.close()
         msg = "The end of the help."
     except:
-        msg = "The file help.txt is not found."
+        msg = "File help.txt is not found."
     return msg
 
 
@@ -560,37 +599,41 @@ def start_note():  # проверка что файл существует ил�
 
     try:
         file = open("note.txt", 'r')
-        print("The file note.txt with notes is loaded.")
+        print("File note.txt with notes is loaded.")
     except:
         file = open("note.txt", 'w')  # создаем новый
-        print("The file note.txt with notes is created.")
+        print("File note.txt with notes is created.")
     finally:
         file.close()
 
 # @input_error
+
+
 def show_all(command_line):
 
     result = ''
 
     for name, record in contacts.items():
-        result = form_record(name, record, result)    
+        result = form_record(name, record, result)
 
     return result
+
 
 def form_record(name, record, result):
 
     email = '---' if record.email == None else record.email
     address = '---' if record.address == None else record.address
     birthday = '---' if record.birthday == None else record.birthday
-        
+
     if len(record.phones_list) == 0:
         phones = '---'
     else:
         phones = ', '.join(record.phones_list)
 
-    result += f'\nName: {name}, Address: {address} , Phones: {phones}, Email: {email}, Date of birth: {birthday},'
+    result += f'\n{name} - Address: {address}. Phones: {phones}. Email: {email}. Date of birth: {birthday}.'
     return result
-    
+
+
 COMMANDS = {
     'close': exit_func,
     'exit': exit_func,
@@ -641,11 +684,11 @@ def main():
         command_line = []
         while not command_line:
             command_line = prompt('>>> ',
-            history=FileHistory('history'),
-            auto_suggest=AutoSuggestFromHistory(),
-            completer=SqlCompleter,
-            style=style
-            ).split()
+                                  history=FileHistory('history'),
+                                  auto_suggest=AutoSuggestFromHistory(),
+                                  completer=SqlCompleter,
+                                  style=style
+                                  ).split()
 
         right_command = False
 
