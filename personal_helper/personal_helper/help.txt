@@ -14,6 +14,10 @@
     'delete birthday': delete birthday Sasha,
     'delete email': delete email Sasha,
     'delete phone': delete phone Sasha (050)555-33-22,
+    'change email': change email Sasha alex.lviv@gmail.com,
+    'change birthday': change birthday Sasha 02.05.1985,
+    'change address': change address Sasha Lviv,
+    'change phone': change phone Sasha (050)555-33-22 (050)111-33-22,
     'coming birthday': coming birthday 7,
     "help": help
     """

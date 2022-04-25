@@ -219,20 +219,23 @@ def remove(command_line):
 @input_error
 def delete_address(command_line):
     key, _ = prepare_value(command_line)
+    address = contacts.get_record(key).address
     contacts.get_record(key).delete_address()
-    return f'Contacts address has been successfully deleted'
+    return f'Contacts address {address} for {key} has been successfully deleted'
 
 @input_error
 def delete_birthday(command_line):
     key, _ = prepare_value(command_line)
+    birthday = contacts.get_record(key).birthday
     contacts.get_record(key).delete_birthday()
-    return f'Contacts birthday date has been successfully deleted'
+    return f'Contacts birthday date {birthday} for {key} has been successfully deleted'
 
 @input_error
 def delete_email(command_line):
     key, _ = prepare_value(command_line)
+    email = contacts.get_record(key).email
     contacts.get_record(key).delete_email()
-    return f'Contacts email has been successfully deleted'
+    return f'Contacts {email} for {key} has been successfully deleted'
 
 @input_error
 def delete_phone(command_line):
@@ -241,7 +244,41 @@ def delete_phone(command_line):
         ix = contacts.get_record(key).phones_list.index(phone)
         if ix >= 0:
             contacts.get_record(key).phones_list.pop(ix)
-        return f'Contacts phone has been successfully deleted'
+        return f'Contacts {phone} has been successfully deleted'
+    else:
+        raise CustomException('Such contact does not exist!!!')
+
+@input_error
+def change_email(command_line):
+    key, email = prepare_value(command_line)
+    contacts.get_record(key).email = email
+    return f'Contacts email {key} has been successfully changed to {email}'
+
+@input_error
+def change_birthday(command_line):
+    key, birthday = prepare_value(command_line)
+    contacts.get_record(key).birthday = birthday
+    return f'Contacts birthday {key} has been successfully changed to {birthday}'
+
+@input_error
+def change_address(command_line):
+    key, address = prepare_value(command_line)
+    contacts.get_record(key).address = address
+    return f'Contacts address {key} has been successfully changed to {address}'
+
+@input_error
+def change_phone(command_line):
+    key, phone = prepare_value(command_line)
+    phones = phone.split()
+    if len(phones) != 2:
+        raise CustomException(
+            '''The command must be with a NAME and 2 phones you want to change 
+            (Format: <change> <name> <old phone> <new phone>)''')
+    if phones[0] in contacts.get_record(key).phones_list:
+        ix = contacts.get_record(key).phones_list.index(phones[0])
+        if ix >= 0:
+            contacts.get_record(key).phones_list[ix] = phones[1]
+        return f'Contacts phone {key} has been successfully changed to {phones[1]}'
     else:
         raise CustomException('Such contact does not exist!!!')
 
@@ -266,12 +303,17 @@ COMMANDS = {
     'delete birthday': delete_birthday,
     'delete email': delete_email,
     'delete phone': delete_phone,
+    'change email': change_email,
+    'change birthday': change_birthday,
+    'change address': change_address,
+    'change phone': change_phone,
     'coming birthday': coming_birthday
 }
 
 ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone',
                       'delete address', 'delete birthday', 'delete email', 'delete phone',
+                      'change email', 'change birthday', 'change address', 'change phone',
                       'coming birthday', 'good bye']
 
 
