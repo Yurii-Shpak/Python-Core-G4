@@ -40,6 +40,16 @@ class AddressBook(UserDict):
             pickle.dump(self.data, fh)
         return f'The contacts book is saved in the file "{file_name}".'
 
+    def search(self, query):
+        result = AddressBook()
+        for key in self.data.keys():
+            if query.lower() in key.lower():
+                match = self.get_record(key)
+                result[key] = match
+        if len(result)>0:
+            return f'{len(result)} records found:\n {result}'
+        else:
+            return f'No record found.'
 
 contacts = AddressBook()
 
@@ -49,7 +59,7 @@ class Record:
     def __init__(self, name, address=None, phones_list=None, email=None, birthday=None):
         self.name = name
         self._address = address
-        self._phones_list = phones_list
+        self._phones_list = []
         self._email = email
         self._birthday = birthday
 
@@ -181,6 +191,10 @@ def add_phone(command_line):
     else:
         raise CustomException('Such phone number has been already added!!!')
 
+@input_error
+def search(command_line):
+    key, _ = prepare_value(command_line)
+    return contacts.search(key)
 
 @input_error
 def coming_birthday(command_line=7):  # in progress
@@ -198,10 +212,11 @@ COMMANDS = {
     'add birthday': add_birthday,
     'add email': add_email,
     'add phone': add_phone,
+    'search': search,
     'coming birthday': coming_birthday
 }
 
-ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save']
+ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'search']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday',
                       'add email', 'add phone', 'coming birthday', 'good bye']
 
