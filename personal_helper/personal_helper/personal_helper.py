@@ -76,7 +76,7 @@ class AddressBook(UserDict):
     def search(self, query):
         result = AddressBook()
         for key in self.data.keys():
-            if query.lower() in key.lower():
+            if query.lower() in str(self.get_record(key)).lower():
                 match = self.get_record(key)
                 result[key] = match
         if len(result) > 0:
@@ -710,13 +710,13 @@ def main():
     while True:
         command_line = []
         while not command_line:
-            command_line = prompt('>>> ',
-                                  history=FileHistory('history'),
-                                  auto_suggest=AutoSuggestFromHistory(),
-                                  completer=SqlCompleter,
-                                  style=style
-                                  ).split()
-            # command_line = input('>>> ').split()
+            # command_line = prompt('>>> ',
+            #                       history=FileHistory('history'),
+            #                       auto_suggest=AutoSuggestFromHistory(),
+            #                       completer=SqlCompleter,
+            #                       style=style
+            #                       ).split()
+            command_line = input('>>> ').split()
 
         right_command = False
 
