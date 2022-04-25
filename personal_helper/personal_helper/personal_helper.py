@@ -1,4 +1,5 @@
-from collections import UserDict
+from collections import UserDict, defaultdict
+from datetime import datetime, timedelta
 import os.path
 import pickle
 import re
@@ -104,7 +105,7 @@ class Record:
 
     @birthday.setter
     def birthday(self, birthday):
-        if re.search('\d{2}\.\d{2}.\d{4}', birthday):
+        if re.search('\d{2}\.\d{2}.\d{4}', birthday) and datetime.strptime(birthday, '%d.%m.%Y'):
             self._birthday = birthday
         else:
             raise CustomException(
@@ -124,9 +125,14 @@ def input_error(func):
         except CustomException as warning_text:
             result = warning_text
 
-        except:
+        except Exception as exc: 
+ 
             if func.__name__ == 'save_func':
                 result = f'Error while saving.'
+            elif func.__name__ == 'add_birthday':
+                result = "Day out of range for this month"
+            elif func.__name__ == 'coming_birthday' and exc.__class__.__name__ == "ValueError":
+                result = "Use a number for getting list of birthdays more than next 7 days"
             elif func.__name__ == 'remove':
                 result = f'Error while removing record.'
             elif func.__name__ == 'delete_address':
@@ -155,11 +161,10 @@ def save_func(command_line):
     return contacts.save_to_file('contacts.bin')
 
 
-# если нет имени, будет ошибка Such contacts name doesn't exist
 def prepare_value(command_line):
     if command_line:
-        key = command_line.pop(0)
-        value = ' '.join(command_line)
+        value = command_line.pop(-1)
+        key = ' '.join(command_line)
         return key, value
     else:
         raise CustomException(
@@ -167,19 +172,22 @@ def prepare_value(command_line):
 
 
 @input_error
-def add_name(command_line):  # если имя уже существует?
+def add_name(command_line): 
     if command_line:
         name = ' '.join(command_line)
-        record = Record(name)
-        contacts[name] = record
-        return f'Contact with the name "{name}" has been successfully added'
+        if name in contacts.keys():
+            raise CustomException(f'Contact with name "{name}" has been already added!!!')
+        else:
+            record = Record(name)
+            contacts[name] = record
+            return f'Contact with the name "{name}" has been successfully added'
     else:
         raise CustomException(
             'The command must be with a NAME you want to add (Format: <add> <name>)')
 
 
 @input_error
-def add_address(command_line):
+def add_address(command_line):# не работает если адресс, не одно слово!
     key, address = prepare_value(command_line)
     contacts.get_record(key).address = address
     return f'Contacts address has been successfully added'
@@ -208,8 +216,32 @@ def add_phone(command_line):
     else:
         raise CustomException('Such phone number has been already added!!!')
 
+    
+def create_for_print(birthdays_dict):
+    to_show = []
+    for date, names in list(birthdays_dict.items()):
+        to_show.append(f'{date.strftime("%A")}({date.strftime("%d.%m.%Y")}): {", ".join(names)}')
+    to_show = "\n".join(to_show)
+    return to_show
 
+    
 @input_error
+def coming_birthday(command_line):#можно задать другой диапазон вывода дней, по умолчанию 7
+    range_days = 7
+    birthdays_dict = defaultdict(list)
+    if command_line:
+        range_days = int(command_line[0])
+    current_date = datetime.now().date()
+    timedelta_filter = timedelta(days = range_days)
+    for name, birthday in [(i.name, i.birthday) for i in contacts.get_values_list()]:
+        if name and birthday: # проверка на None
+            birthday_date = datetime.strptime(birthday, '%d.%m.%Y').date()
+            current_birthday = birthday_date.replace(year=current_date.year)
+            if current_date <= current_birthday <= current_date + timedelta_filter:
+                birthdays_dict[current_birthday].append(name)
+    return create_for_print(birthdays_dict)
+
+
 def remove(command_line):
     key, _ = prepare_value(command_line)
     if contacts.get_record(key):
@@ -291,12 +323,6 @@ def change_phone(command_line):
         return f'Contacts phone {key} has been successfully changed to {phones[1]}'
     else:
         raise CustomException('Such contact does not exist!!!')
-
-
-@input_error
-def coming_birthday(command_line=7):  # in progress
-    list_bithday = [i for i in contacts.get_values_list()]
-    return contacts.get_values_list()
 
  # блок кода касающийся заметок###########
 
