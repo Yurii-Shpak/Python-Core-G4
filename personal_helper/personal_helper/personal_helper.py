@@ -174,6 +174,7 @@ def add_email(command_line):
 
 @input_error
 def add_phone(command_line):
+    print(command_line)
     key, phone = prepare_value(command_line)
     if not phone in contacts.get_record(key).phones_list:
         contacts.get_record(key).append_phone(phone)
@@ -187,6 +188,19 @@ def coming_birthday(command_line=7):  # in progress
     list_bithday = [i for i in contacts.get_values_list()]
     return contacts.get_values_list()
 
+@input_error
+def show_all(command_line):
+    contact_book = contacts.get_values_list()
+    print(contact_book)
+    for key in contact_book:
+
+        print(key)  
+    return contacts  
+
+@input_error
+def find_contact(command_line):
+    print(command_line)
+    print(contacts)
 
 COMMANDS = {
     'close': exit_func,
@@ -198,12 +212,14 @@ COMMANDS = {
     'add birthday': add_birthday,
     'add email': add_email,
     'add phone': add_phone,
-    'coming birthday': coming_birthday
+    'coming birthday': coming_birthday,
+    'show all': show_all,
+    'find': find_contact,
 }
 
-ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save']
+ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'find']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday',
-                      'add email', 'add phone', 'coming birthday', 'good bye']
+                      'add email', 'add phone', 'coming birthday', 'good bye', 'show all']
 
 
 def get_handler(command):
