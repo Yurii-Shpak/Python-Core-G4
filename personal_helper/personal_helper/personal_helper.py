@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import os.path
 import pickle
 import re
-import clean
+from . import clean
 
 # --------------------------------Prompt Toolkit-------------------------------
 from prompt_toolkit import prompt
