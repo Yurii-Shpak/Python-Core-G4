@@ -44,3 +44,8 @@ you can run the bot using 'personal-helper' command in any place in the command 
 
 'Personal Helper' communicates with a user through console commands. You can view them using command
 'hlp me' inside the bot or in the 'help.txt' file that is included into the package.
+
+IMPORTANT! Delimiter symbol inside of all the commands is SPACE.
+
+The bot uses Prompt Toolkit package that propose a list of commands by the first letters typed in
+the command line.
