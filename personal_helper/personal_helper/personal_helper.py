@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import os.path
 import pickle
 import re
-from datetime import datetime
 import clean
 
 # --------------------------------Prompt Toolkit-------------------------------
@@ -583,7 +582,7 @@ def change_note(command_line):
             print("ID selection error. Maybe the reason is manual file editing.")
 
     except:
-        print("The ID is not in the DD.MM.YYYY - hh.mm.ss formt. Copy ID from the search results.")
+        print("The ID is not in the DD.MM.YYYY - hh.mm.ss format. Copy ID from the search results.")
     return msg
 
 
@@ -618,13 +617,62 @@ def delete_note(command_line):
             print("ID selection error. Maybe the reason is manual file editing.")
 
     except:
-        print("The ID is not in the DD.MM.YYYY - hh.mm.ss formt. Copy ID from the search results.")
+        print("The ID is not in the DD.MM.YYYY - hh.mm.ss format. Copy ID from the search results.")
     return msg
 
 
 @input_error
 def tag_note(command_line):
-    pass
+    """Привязка тега к заметке, далее поиск с хештегом осуществляется
+       обычной командой find note #....
+    """
+    # разбираем команду в формат (dt_id:"%d.%m.%Y - %H:%M:%S" = '', tag:str = '')
+    if len(command_line) >= 4:
+        dt_id = command_line[0] + ' ' + command_line[1] + ' ' + command_line[2]
+        tag = command_line[3]
+    elif len(command_line) == 3:
+        dt_id = command_line[0] + command_line[1] + command_line[2]
+        tag = ''
+    else:
+        dt_id = ''
+        tag = ''
+
+    msg = "The hashtag is not acceptable."
+    try:
+        # проверка что идентификатор задан в формате
+        loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S")
+        try:
+            with open("note.txt", "r") as file:
+                buffer = file.readlines()
+            for i in range(len(buffer)):
+                d_id = buffer[i][:21]  # полный идентификатор
+                n_id = datetime.strptime(d_id, "%d.%m.%Y - %H:%M:%S")
+                if n_id == loc_id:  # совпадение текущего ид с заданным
+                    if tag != '':
+                        # забили перенос строки, добавили хештег и перенос
+                        j = buffer[i][:len(buffer[i])-1] + '  #' + tag + '\n'
+                        # строка неизменяема, нельзя сразу писать buffer[i] = buffer[i] + tag
+                        buffer[i] = j
+                        msg = "The hashtag is accepted."
+                        break
+                    else:
+                        in_q = input("The tag is empty. Are you sure? y or n")
+                        if in_q == 'y':
+                            # забили перенос строки, добавили хештег и перенос
+                            j = buffer[i][:len(buffer[i])-1] + \
+                                '  #' + tag + '\n'
+                            # строка неизменяема, нельзя сразу писать buffer[i] = buffer[i] + tag
+                            buffer[i] = j
+                            msg = "The hashtag is accepted."
+                        break
+            with open("note.txt", "w") as file:  # удаляем содержимое старого файла, пишем заново
+                file.writelines(buffer)  # пишем построчно из буфера
+        except:
+            print("ID selection error. Maybe the reason is manual file editing.")
+
+    except:
+        print("The ID is not in the DD.MM.YYYY - hh.mm.ss format. Copy ID from the search results.")
+    return msg
 
 
 @input_error

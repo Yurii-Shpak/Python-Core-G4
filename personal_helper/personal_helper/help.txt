@@ -164,4 +164,9 @@
     show all
         Displaying content of the contacts book.
 
+    tag note
+        Tagging specified note with a hashtag in #tag format.
+        Examples:
+            tag note 01.01.2022 10.01.2022 my_hashtag
+
     """
