@@ -238,7 +238,7 @@ def prepare_value(command_line):
 def prepare_value_3(command_line):
     if command_line:
         key = ' '.join(command_line)
-        value = input('Enter you address >>> ')
+        value = input('Enter the address >>> ')
         return key, value
     else:
         raise CustomException(
