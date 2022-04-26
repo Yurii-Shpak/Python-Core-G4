@@ -63,9 +63,9 @@ class AddressBook(UserDict):
                 if len(self.data):
                     return f'The contacts book is loaded from the file "{file_name}".'
                 else:
-                    return 'This is empty contacts book. Add contacts to it.'
+                    return "This is empty contacts book. Add contacts to it using the command 'add < NAME > '."
         else:
-            return 'This is empty contacts book. Add contacts into it.'
+            return "This is empty contacts book. Add contacts into it using the command 'add <NAME>'."
 
     def save_to_file(self, file_name):
         with open(file_name, 'wb') as fh:
@@ -790,6 +790,7 @@ def get_handler(command):
 
 def main():
 
+    print("Enter 'hlp me' command to see all the commands available.")
     start_note()
     print(contacts.load_from_file(
         f"{os.path.dirname(os.path.abspath(__file__))}/contacts.bin"))
