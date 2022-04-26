@@ -4,6 +4,7 @@ import os.path
 import pickle
 import re
 from datetime import datetime
+import clean
 
 # --------------------------------Prompt Toolkit-------------------------------
 from prompt_toolkit import prompt
@@ -16,9 +17,9 @@ from prompt_toolkit.styles import Style
 SqlCompleter = WordCompleter([
     'add', 'close', 'exit', 'save', 'remove', 'add address', 'add birthday', 'add email', 'add phone',
     'delete address', 'delete birthday', 'delete email', 'delete phone',
-                      'change email', 'change birthday', 'change address', 'change phone',
-                      'coming birthday', 'good bye', "add note", "find note", "change note",
-                      "delete note", "tag note", "hlp me", 'show all'], ignore_case=True)
+    'change email', 'change birthday', 'change address', 'change phone',
+    'coming birthday', 'good bye', "add note", "find note", "change note",
+    "delete note", "tag note", "hlp me", 'show all', 'search'], ignore_case=True)
 
 style = Style.from_dict({
     'completion-menu.completion': 'bg:#008888 #ffffff',
@@ -40,21 +41,21 @@ class AddressBook(UserDict):
         if self.data:
             return self.data.values()
         else:
-            raise CustomException('Address book is empty')
+            raise CustomException('Address book is empty.')
 
     def get_record(self, name):
         if self.data.get(name):
             return self.data.get(name)
         else:
             raise CustomException(
-                'Such contacts name doesn\'t exist (Command format: <command> <name> <information>)')
+                'Such contacts doesn\'t exist.')
 
     def remove(self, name):
         if self.data.get(name):
             self.data.pop(name)
         else:
             raise CustomException(
-                'Such contacts name doesn\'t exist (Command format: <command> <name> <information>)')
+                'Such contact  doesn\'t exist.')
 
     def load_from_file(self, file_name):
         if os.path.exists(file_name):
@@ -71,6 +72,23 @@ class AddressBook(UserDict):
         with open(file_name, 'wb') as fh:
             pickle.dump(self.data, fh)
         return f'The contacts book is saved in the file "{file_name}".'
+
+    def search(self, query):
+        result = AddressBook()
+        for key in self.data.keys():
+            if query.lower() in str(self.get_record(key)).lower():
+                match = self.get_record(key)
+                result[key] = match
+        if len(result) > 0:
+            return f'{len(result)} records found:\n {result}'
+        else:
+            return f'No records found.'
+
+    def __repr__(self):
+        result = ""
+        for key in self.data.keys():
+            result += str(self.data.get(key))
+        return result
 
 
 contacts = AddressBook()
@@ -137,6 +155,17 @@ class Record:
     def delete_birthday(self):
         self._birthday = None
 
+    def __repr__(self):
+        name = self.name
+        email = '---' if self.email == None else self.email
+        address = '---' if self.address == None else self.address
+        birthday = '---' if self.birthday == None else self.birthday
+        if len(self.phones_list) == 0:
+            phones = '---'
+        else:
+            phones = ', '.join(self.phones_list)
+        return f'\n{name} - Address: {address}. Phones: {phones}. Email: {email}. Date of birth: {birthday}.'
+
 
 def input_error(func):
 
@@ -153,9 +182,9 @@ def input_error(func):
             if func.__name__ == 'save_func':
                 result = f'Error while saving.'
             elif func.__name__ == 'add_birthday':
-                result = "Day out of range for this month"
+                result = "Day out of range for this month."
             elif func.__name__ == 'coming_birthday' and exc.__class__.__name__ == "ValueError":
-                result = "Use a number for getting list of birthdays more than next 7 days"
+                result = "Use a number for getting list of birthdays more than next 7 days."
             elif func.__name__ == 'remove':
                 result = f'Error while removing record.'
             elif func.__name__ == 'change_address':
@@ -174,6 +203,10 @@ def input_error(func):
                 result = f'Error while deleting email.'
             elif func.__name__ == 'delete_phone':
                 result = f'Error while deleting phone.'
+            elif func.__name__ == 'search':
+                result = f'Error while searching.'
+            elif func.__name__ == 'clean_func':
+                result = f'Error while cleaning the folder.'
 
         return result
 
@@ -218,7 +251,7 @@ def add_name(command_line):
         name = ' '.join(command_line)
         if name in contacts.keys():
             raise CustomException(
-                f'Contact with name "{name}" has been already added!!!')
+                f'Contact with name "{name}" has been already added!')
         else:
             record = Record(name)
             contacts[name] = record
@@ -229,7 +262,7 @@ def add_name(command_line):
 
 
 @input_error
-def add_address(command_line):  # не работает если адресс, не одно слово!
+def add_address(command_line):
     key, address = prepare_value_3(command_line)
     contacts.get_record(key).address = address
     return f'Address {address} for the contact "{key}" has been successfully added.'
@@ -256,7 +289,7 @@ def add_phone(command_line):
         contacts.get_record(key).append_phone(phone)
         return f'Phone number {phone} for the contact "{key}" has been successfully added.'
     else:
-        raise CustomException('Such phone number has been already added!!!')
+        raise CustomException('Such phone number has been already added!')
 
 
 def create_for_print(birthdays_dict):
@@ -264,8 +297,10 @@ def create_for_print(birthdays_dict):
     for date, names in list(birthdays_dict.items()):
         to_show.append(
             f'{date.strftime("%A")}({date.strftime("%d.%m.%Y")}): {", ".join(names)}')
-    to_show = "\n".join(to_show)
-    return to_show
+    if len(to_show) == 0:
+        return f'There are no birthdays coming within this period.'
+    else:
+        return "\n".join(to_show)
 
 
 @input_error
@@ -284,6 +319,15 @@ def coming_birthday(command_line):
             if current_date <= current_birthday <= current_date + timedelta_filter:
                 birthdays_dict[current_birthday].append(name)
     return create_for_print(birthdays_dict)
+
+
+@input_error
+def search(command_line):
+    #key, value = prepare_value(command_line)
+    if command_line:
+        return contacts.search(' '.join(command_line).strip())
+    else:
+        return 'Specify the search string.'
 
 
 @input_error
@@ -365,9 +409,13 @@ def change_birthday(command_line):
 
 @input_error
 def change_address(command_line):
-    key, address = prepare_value(command_line)
-    contacts.get_record(key).address = address
-    return f'Contacts address {key} has been successfully changed to {address}'
+    key, address = prepare_value_3(command_line)
+    if key in contacts.keys():
+        contacts.get_record(key).address = address
+        return f'Address for the contact "{key}" has been successfully changed to "{address}".'
+    else:
+        raise CustomException(
+            f'Contact "{key}" does not exist!')
 
 
 @input_error
@@ -535,7 +583,7 @@ def change_note(command_line):
             print("ID selection error. Maybe the reason is manual file editing.")
 
     except:
-        print("The ID is not in the DD.MM.YYYY - HH.MM.SS formt. Copy ID from the search results.")
+        print("The ID is not in the DD.MM.YYYY - hh.mm.ss formt. Copy ID from the search results.")
     return msg
 
 
@@ -570,7 +618,7 @@ def delete_note(command_line):
             print("ID selection error. Maybe the reason is manual file editing.")
 
     except:
-        print("The ID is not in the DD.MM.YYYY - HH.MM.SS formt. Copy ID from the search results.")
+        print("The ID is not in the DD.MM.YYYY - hh.mm.ss formt. Copy ID from the search results.")
     return msg
 
 
@@ -606,9 +654,8 @@ def start_note():  # проверка что файл существует ил�
     finally:
         file.close()
 
-# @input_error
 
-
+@input_error
 def show_all(command_line):
 
     result = ''
@@ -632,6 +679,11 @@ def form_record(name, record, result):
 
     result += f'\n{name} - Address: {address}. Phones: {phones}. Email: {email}. Date of birth: {birthday}.'
     return result
+
+
+@input_error
+def clean_func(command_line):
+    return clean.start_cleaning(command_line)
 
 
 COMMANDS = {
@@ -661,9 +713,12 @@ COMMANDS = {
     "tag note": tag_note,
     "hlp me": help_common,
     'show all': show_all,
+    'search': search,
+    'clean': clean_func
 }
 
-ONE_WORD_COMMANDS = ['add', 'close', 'exit', 'save', 'remove']
+ONE_WORD_COMMANDS = ['add', 'clean', 'close',
+                     'exit', 'save', 'remove', 'search']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone',
                       'delete address', 'delete birthday', 'delete email', 'delete phone',
                       'change email', 'change birthday', 'change address', 'change phone',
