@@ -457,7 +457,7 @@ def add_note(command_line):
     current_id = datetime.now()
     # преобразовали в строку дату время создания
     crt = current_id.strftime("%d.%m.%Y - %H:%M:%S")
-    with open("note.txt", "a+") as file:
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", "a+") as file:
         file.write(crt+" :: "+note+"\n")  # первые 21 символ - строка
     return "The note is added."
 
@@ -509,7 +509,7 @@ def find_note(command_line):
     else:
         print("The keyword is not stated. The search will be performed for all notes.")
 
-    with open("note.txt", "r+") as file:
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", "r+") as file:
         lines = file.readlines()  # список строк из файла заметок
 
     msg = "No one note is found."
@@ -557,7 +557,7 @@ def change_note(command_line):
         # проверка что идентификатор задан в формате
         loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S")
         try:
-            with open("note.txt", "r") as file:
+            with open(f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", "r") as file:
                 buffer = file.readlines()
             for i in range(len(buffer)):
                 d_id = buffer[i][:21]  # полный идентификатор
@@ -576,7 +576,8 @@ def change_note(command_line):
                             buffer[i] = d_id+" :: "+data+"\n"
                             msg = "The note is changed"
                         break
-            with open("note.txt", "w") as file:  # удаляем содержимое старого файла, пишем заново
+            # удаляем содержимое старого файла, пишем заново
+            with open(f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", "w") as file:
                 file.writelines(buffer)  # пишем построчно из буфера
         except:
             print("ID selection error. Maybe the reason is manual file editing.")
@@ -602,7 +603,7 @@ def delete_note(command_line):
         # проверка что идентификатор задан в формате
         loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S")
         try:
-            with open("note.txt", "r") as file:
+            with open(f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", "r") as file:
                 buffer = file.readlines()
             for i in range(len(buffer)):
                 d_id = buffer[i][:21]  # полный идентификатор
@@ -611,7 +612,8 @@ def delete_note(command_line):
                     buffer.pop(i)
                     msg = "The note is deleted"
                     break
-            with open("note.txt", "w") as file:  # удаляем содержимое старого файла, пишем заново
+            # удаляем содержимое старого файла, пишем заново
+            with open(f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", "w") as file:
                 file.writelines(buffer)  # пишем построчно из буфера
         except:
             print("ID selection error. Maybe the reason is manual file editing.")
@@ -642,7 +644,7 @@ def tag_note(command_line):
         # проверка что идентификатор задан в формате
         loc_id = datetime.strptime(dt_id, "%d.%m.%Y - %H:%M:%S")
         try:
-            with open("note.txt", "r") as file:
+            with open(f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", "r") as file:
                 buffer = file.readlines()
             for i in range(len(buffer)):
                 d_id = buffer[i][:21]  # полный идентификатор
@@ -665,7 +667,8 @@ def tag_note(command_line):
                             buffer[i] = j
                             msg = "The hashtag is accepted."
                         break
-            with open("note.txt", "w") as file:  # удаляем содержимое старого файла, пишем заново
+            # удаляем содержимое старого файла, пишем заново
+            with open(f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", "w") as file:
                 file.writelines(buffer)  # пишем построчно из буфера
         except:
             print("ID selection error. Maybe the reason is manual file editing.")
@@ -679,7 +682,8 @@ def tag_note(command_line):
 def help_common(command_line):
 
     try:
-        file = open("help.txt", 'r')
+        file = open(
+            f"{os.path.dirname(os.path.abspath(__file__))}/help.txt", 'r')
         help_lines = file.readlines()
         for i in help_lines:
             # забили последний символ переноса строки - для красивого вывода
@@ -694,10 +698,13 @@ def help_common(command_line):
 def start_note():  # проверка что файл существует или его создание
 
     try:
-        file = open("note.txt", 'r')
+        file = open(
+            f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", 'r')
         print("File note.txt with notes is loaded.")
     except:
-        file = open("note.txt", 'w')  # создаем новый
+        # создаем новый
+        file = open(
+            f"{os.path.dirname(os.path.abspath(__file__))}/note.txt", 'w')
         print("File note.txt with notes is created.")
     finally:
         file.close()
@@ -781,7 +788,8 @@ def get_handler(command):
 def main():
 
     start_note()
-    print(contacts.load_from_file('contacts.bin'))
+    print(contacts.load_from_file(
+        f"{os.path.dirname(os.path.abspath(__file__))}/contacts.bin"))
 
     while True:
         command_line = []
@@ -812,7 +820,8 @@ def main():
         handler = get_handler(command)
         print(handler(command_line))
         if handler is exit_func:
-            print(contacts.save_to_file('contacts.bin'))
+            print(contacts.save_to_file(
+                f"{os.path.dirname(os.path.abspath(__file__))}/contacts.bin"))
             break
 
 
