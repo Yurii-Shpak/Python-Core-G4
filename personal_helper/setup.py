@@ -9,5 +9,7 @@ setup(
     author_email='yshpak.gora@gmail.com',
     license='MIT',
     packages=find_packages(),
-    entry_points={'console_scripts': ['personal-helper = personal_helper.personal_helper:main']}
+    py_modules=['clean'],
+    entry_points={'console_scripts': [
+        'personal-helper = personal_helper.personal_helper:main']}
 )
