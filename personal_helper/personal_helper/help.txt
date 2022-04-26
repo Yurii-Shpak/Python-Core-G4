@@ -139,6 +139,8 @@
             Show all the notes with the substring 'bill', 'BILL', 'Bill', 'bIll' etc.
             starting from 01.01.2022 up to 10.01.2022:
                 find note bill 01.01.2022 10.01.2022
+            Find notes by a tag:
+                find note #my_tag
 
     good bye
         Exit.
