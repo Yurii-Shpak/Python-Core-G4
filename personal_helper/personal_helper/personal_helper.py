@@ -718,7 +718,10 @@ def show_all(command_line):
     for name, record in contacts.items():
         result = form_record(name, record, result)
 
-    return result
+    if result:
+        return result
+    else:
+        return 'There are no contacts in the book.'
 
 
 def form_record(name, record, result):
