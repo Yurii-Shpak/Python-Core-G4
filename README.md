@@ -12,7 +12,7 @@ In the CONTACTS BOOK mode, user of the 'Personal Helper' can do the following.
     - Add, change and delete such contacts data as name, address, phone numbers, email and date of birth.
     - Search contacts by their data.
     - View contacts whose birthday is within specified period starting from today.
-    - View the list of all caontacts in the book.
+    - View the list of all contacts in the book.
 
     All the phones, emails and dates are being checked if they match strict rules:
     - (0XX)XXX-XX-XX for phone numbers.
@@ -43,7 +43,7 @@ Package can be installed into system with a console command "python setup.py ins
 you can run the bot using 'personal-helper' command in any place in the command line mode.
 
 'Personal Helper' communicates with a user through console commands. You can view them using command
-'hlp me' inside the bot or in the 'help.txt' file that is included into the package.
+'help' inside the bot or in the 'help.txt' file that is included into the package.
 
 IMPORTANT! Delimiter symbol inside of all the commands is SPACE.
 
