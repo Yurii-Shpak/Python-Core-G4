@@ -163,7 +163,9 @@ class Record:
             phones = '---'
         else:
             phones = ', '.join(self.phones_list)
-        return f'\n{name} - Address: {address}. Phones: {phones}. Email: {email}. Date of birth: {birthday}.'
+        return f'\n┌{"-" * 108}┐\n| {name:<51} Phones: {phones:<46} |\
+                 \n| Email: {email:<73} Date of birth: {birthday:<10} |\
+                 \n| Address: {address:<97} |\n└{"-" * 108}┘\n'
 
 
 def input_error(func):
@@ -713,30 +715,10 @@ def start_note():  # проверка что файл существует ил�
 @input_error
 def show_all(command_line):
 
-    result = ''
-
-    for name, record in contacts.items():
-        result = form_record(name, record, result)
-
-    if result:
-        return result
+    if len(contacts.items()) > 0:
+        return str(contacts)
     else:
         return 'There are no contacts in the book.'
-
-
-def form_record(name, record, result):
-
-    email = '---' if record.email == None else record.email
-    address = '---' if record.address == None else record.address
-    birthday = '---' if record.birthday == None else record.birthday
-
-    if len(record.phones_list) == 0:
-        phones = '---'
-    else:
-        phones = ', '.join(record.phones_list)
-
-    result += f'\n{name} - Address: {address}. Phones: {phones}. Email: {email}. Date of birth: {birthday}.'
-    return result
 
 
 @input_error
