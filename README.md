@@ -54,5 +54,5 @@ INSTALLATION:
 
 'Personal Helper' is being distributed in the form of Python package. You can install it using one
 of the following two commands in the directory with setup.py file:
-    pip install .
-    python setup.py install
+-    pip install .
+-    python setup.py install
