@@ -18,7 +18,7 @@ SqlCompleter = WordCompleter([
     'delete address', 'delete birthday', 'delete email', 'delete phone',
     'change email', 'change birthday', 'change address', 'change phone',
     'coming birthday', 'good bye', "add note", "find note", "change note",
-    "delete note", "tag note", "hlp me", 'show all', 'search', 'clean'], ignore_case=True)
+    "delete note", "tag note", "help", 'show all', 'search', 'clean'], ignore_case=True)
 
 style = Style.from_dict({
     'completion-menu.completion': 'bg:#008888 #ffffff',
@@ -769,19 +769,19 @@ COMMANDS = {
     "change note": change_note,
     "delete note": delete_note,
     "tag note": tag_note,
-    "hlp me": help_common,
+    "help": help_common,
     'show all': show_all,
     'search': search,
     'clean': clean_func
 }
 
-ONE_WORD_COMMANDS = ['add', 'clean', 'close',
+ONE_WORD_COMMANDS = ['add', 'clean', 'close', "help",
                      'exit', 'save', 'remove', 'search']
 TWO_WORDS_COMMANDS = ['add address', 'add birthday', 'add email', 'add phone',
                       'delete address', 'delete birthday', 'delete email', 'delete phone',
                       'change email', 'change birthday', 'change address', 'change phone',
                       'coming birthday', 'good bye', "add note", "find note", "change note",
-                      "delete note", "tag note", "hlp me", 'show all']
+                      "delete note", "tag note", 'show all']
 
 
 def get_handler(command):
@@ -790,7 +790,7 @@ def get_handler(command):
 
 def main():
 
-    print("Enter 'hlp me' command to see all the commands available.")
+    print("Enter 'help' command to see all the commands available.")
     start_note()
     print(contacts.load_from_file(
         f"{os.path.dirname(os.path.abspath(__file__))}/contacts.bin"))

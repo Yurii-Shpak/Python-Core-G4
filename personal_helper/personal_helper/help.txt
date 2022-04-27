@@ -145,7 +145,7 @@
     good bye
         Exit.
 
-    hlp me
+    help
         Displaying this help.
 
     remove
